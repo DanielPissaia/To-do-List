@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Boa do dia</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <main class="container">
+
+        <p id="currentDate"></p>
+
+        <h1>Boa do dia</h1>
+
+        <div class="date-selector">
+            <label for="taskDate">
+                Selecione a data:
+            </label>
+
+            <input
+                type="date"
+                id="taskDate"
+            >
+        </div>
+
+        <div class="task-form">
+            <input
+                type="text"
+                id="taskInput"
+                placeholder="Digite a boa de hoje"
+            >
+
+            <button id="addTaskButton">
+                Adicionar
+            </button>
+
+            <button id="clearTasksButton">
+                Limpar
+            </button>
+        </div>
+
+        <ul id="taskList"></ul>
+
+    </main>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
