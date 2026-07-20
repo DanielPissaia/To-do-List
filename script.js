@@ -6,7 +6,15 @@ const supabaseKey =
 
 const supabaseClient = window.supabase.createClient(
     supabaseUrl,
-    supabaseKey
+    supabaseKey,
+    {
+        auth: {
+            persistSession: true,
+            storage: window.sessionStorage,
+            autoRefreshToken: true,
+            detectSessionInUrl: true
+        }
+    }
 );
 
 // Elementos da agenda
@@ -27,6 +35,9 @@ const currentDateElement =
 
 const taskDateInput =
     document.getElementById("taskDate");
+
+const logoutButton =
+    document.getElementById("logoutButton");
 
 // Elementos da tela de login
 const loginSection =
@@ -282,6 +293,39 @@ async function login() {
     await loadTasks();
 }
 
+// Encerra a sessão
+async function logout() {
+    const { error } =
+        await supabaseClient.auth.signOut({
+            scope: "local"
+        });
+
+    if (error) {
+        console.error(
+            "Erro ao sair:",
+            error
+        );
+
+        alert(
+            "Não foi possível encerrar a sessão."
+        );
+
+        return;
+    }
+
+    tasks = [];
+    taskList.innerHTML = "";
+
+    appSection.hidden = true;
+    loginSection.hidden = false;
+
+    loginEmail.value = "";
+    loginPassword.value = "";
+    loginMessage.textContent = "";
+
+    loginEmail.focus();
+}
+
 // Verifica se já existe uma sessão
 async function checkSession() {
     const { data, error } =
@@ -378,6 +422,12 @@ async function addTask() {
 addTaskButton.addEventListener(
     "click",
     addTask
+);
+
+// Sair clicando no botão
+logoutButton.addEventListener(
+    "click",
+    logout
 );
 
 // Adicionar pressionando Enter
