@@ -16,6 +16,21 @@
 
 <body>
     <main class="container">
+        <selection id="loginSection">
+            <h2>Entrar na Agenda TI</h2>
+
+            <label for="loginEmail">E-mail</label>
+            <input type="email" id="loginEmail" placeholder="Digite seu e-mail">
+
+            <label for="loginPassword">Senha</label>
+            <input type="password" id="loginPassword" placeholder="Digite sua senha">
+
+            <button id="loginButton">Entrar</button>
+            <p id="loginMessage"></p>
+
+            </selection>
+
+            <section id="appSection" hidden>
 
         <p id="currentDate"></p>
 
@@ -49,9 +64,12 @@
         </div>
 
         <ul id="taskList"></ul>
+        <section id="appSection" hidden>
+        </section>
 
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> 
     <script src="script.js"></script>
 </body>
 
