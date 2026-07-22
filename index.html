@@ -9,7 +9,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Boa do dia</title>
+    <title>Organizadora TI</title>
 
     <link rel="stylesheet" href="style.css">
 </head>
@@ -19,9 +19,12 @@
 
         <!-- Área de login -->
         <section id="loginSection">
-            <h2>Entrar na Agenda TI</h2>
+            <h2>Entrar na Organizadora TI</h2>
 
-            <label for="loginEmail">E-mail</label>
+            <label for="loginEmail">
+                E-mail
+            </label>
+
             <input
                 type="email"
                 id="loginEmail"
@@ -29,7 +32,10 @@
                 autocomplete="email"
             >
 
-            <label for="loginPassword">Senha</label>
+            <label for="loginPassword">
+                Senha
+            </label>
+
             <input
                 type="password"
                 id="loginPassword"
@@ -37,217 +43,175 @@
                 autocomplete="current-password"
             >
 
-            <button id="loginButton" type="button">
+            <button
+                id="loginButton"
+                type="button"
+            >
                 Entrar
             </button>
 
             <p id="loginMessage"></p>
         </section>
 
-    <section id="appSection" hidden>
+        <!-- Área principal -->
+        <section id="appSection" hidden>
 
-        <header class="app-header">
-            <div class="app-title">
-                <span class="app-icon">✓</span>
+            <header class="app-header">
+                <div class="app-title">
+                    <span class="app-icon">
+                        ✓
+                    </span>
 
-                <div>
-                    <h1> Organizadora TI </h1>
-                    <p> Organizar tarefas do dia e suas prioridades</p>
+                    <div>
+                        <h1>Organizadora TI</h1>
 
+                        <p>
+                            Organize as tarefas e suas prioridades
+                        </p>
+                    </div>
                 </div>
+
+                <button
+                    id="logoutButton"
+                    type="button"
+                    class="logout-button"
+                >
+                    Sair
+                </button>
+            </header>
+
+            <!-- Criar uma nova tarefa -->
+            <div class="task-creator">
+                <input
+                    type="text"
+                    id="taskInput"
+                    placeholder="Digite uma nova tarefa"
+                    autocomplete="off"
+                >
+
+                <select id="taskCategory">
+                    <option value="important">
+                        Mais importante
+                    </option>
+
+                    <option
+                        value="required"
+                        selected
+                    >
+                        Precisa ser feito
+                    </option>
+
+                    <option value="whenever">
+                        Fazer quando tiver tempo
+                    </option>
+                </select>
+
+                <button
+                    id="addTaskButton"
+                    type="button"
+                >
+                    Adicionar tarefa
+                </button>
             </div>
 
-            <button
-            id="logoutButton"
-            type="button"
-            class="logout-button"
-        
-            >
-        Sair
-        </button>
-        </header>
+            <!-- Quadro de prioridades -->
+            <div class="priority-board">
 
-        <div class="task-creator">
-            <intup
-            type="text"
-            id="Taskinput"
-            placeholder="Digite uma nova tarefa"
-            autocomplete="off"
-            >
-        <select id="taskCategory">
+                <!-- Mais importante -->
+                <section
+                    class="priority-column important-column"
+                    data-category="important"
+                >
+                    <header class="column-header">
+                        <div>
+                            <h2>
+                                🚩 Mais importante
+                            </h2>
 
-        <option value="important">
-            Mais Importante
-        </option>
-        
-        <option value="required" selected>
-            Tarefas pendentes
-        </option>
+                            <p>
+                                Tarefas urgentes ou de impacto imediato
+                            </p>
+                        </div>
 
-        <option value="whenever">
-            Fazer com o tempo
-        </option>
+                        <span
+                            id="importantCount"
+                            class="task-count"
+                        >
+                            0
+                        </span>
+                    </header>
 
-        <button
-        id="addTaskButton"
-        type="button"
-        >
-           Adicionar tarefa
-    </button>
-</div>
+                    <div
+                        id="importantList"
+                        class="task-drop-zone"
+                        data-category="important"
+                    ></div>
+                </section>
 
-        <!-- Coluna: Mais importante-->
-         
-        <section
-         class="priority-column important-column"
-         data-category="important"
-         >
-        
-        <header class="column-header">
-            <div>
-                <h2> Mais importante</h2>
+                <!-- Precisa ser feito -->
+                <section
+                    class="priority-column required-column"
+                    data-category="required"
+                >
+                    <header class="column-header">
+                        <div>
+                            <h2>
+                                📋 Precisa ser feito
+                            </h2>
 
-                <p>
-                    Tarefas urgentes/necessárias.
-                </p>
+                            <p>
+                                Tarefas necessárias, mas não urgentes
+                            </p>
+                        </div>
+
+                        <span
+                            id="requiredCount"
+                            class="task-count"
+                        >
+                            0
+                        </span>
+                    </header>
+
+                    <div
+                        id="requiredList"
+                        class="task-drop-zone"
+                        data-category="required"
+                    ></div>
+                </section>
+
+                <!-- Fazer quando tiver tempo -->
+                <section
+                    class="priority-column whenever-column"
+                    data-category="whenever"
+                >
+                    <header class="column-header">
+                        <div>
+                            <h2>
+                                ◷ Fazer quando tiver tempo
+                            </h2>
+
+                            <p>
+                                Melhorias e atividades sem urgência
+                            </p>
+                        </div>
+
+                        <span
+                            id="wheneverCount"
+                            class="task-count"
+                        >
+                            0
+                        </span>
+                    </header>
+
+                    <div
+                        id="wheneverList"
+                        class="task-drop-zone"
+                        data-category="whenever"
+                    ></div>
+                </section>
+
             </div>
-
-            <span
-            id="ImportantCount"
-            class="task-count"
-            >
-        0
-        </span>
-</header>
-
-<div
-id="ImportantList"
-class="task-drop-zone"
-data-category="important"
-
-></div>
-
-</section>
-
-<!-- Coluna: Precisa ser feito-->
- <section
- class="priority-column required-column"
- data-category="required"
- >
-
-    <hander class="column-header">
-<div>
-
-    <h2> Precisa ser feito </h2>
-
-    <p>
-Tarefas necessárias, mas não urgentes
-    </p>
-
-    </div>
-
-    <span
-    id="requiredCount"
-    class="task-count"
-    >
-
-    0
-
-    </span>
-</header>
-
-<div    
-id="importantList"
-class="task-drop-zone"
-data-category="importante"
-
-></div>
-</section>
-
-<!-- Coluna: Preicisa ser feito-->
- <Section
- class="priority-column required-column"
- data-category="required"
-
- >
-
-<header class="column-header">
-    <div>
-<h2>Precisa ser feito</h2>
-
-<p>
-
-    Tarefas necessárias, mas não urgentes
-</p>
-    </div>
-
-    <span
-    id="requiredCount"
-    class="task-count"
-    >
-
-    0
-
-</span>
-</header>
-
-<div 
-id="requiredList"
-class="task-drop-zone"
-data-category="required"
-
-></div>
-
-</Section>
-
-<!-- Coluna: Quando tiver tempo -->
-
-<section
-class="priority-column whenever-column"
-data-category="whenever"
->
-
-<header class="column-header">
-
-<div>
-    <h2> Fazer quando tiver tempo </h2>
-<p>
-
-    Melhorias e atividades sem urgência
-</p>
-
-</div>
-<span
-id="wheneverCount"
-class="task-count"
-
->
-0
-</span>
-</header>
-
-<div
-id="wheneverList"
-class="task-drop-zone"
-data-category="whenever"
-></div>
-</section>
-</div>
-
-</section>
-
-
-
-
-
-            </button>
-
-            <div class="date-selector">
-                <label for="taskDate">
-                    Selecione a data:
-                </label>
-
-          
+        </section>
 
     </main>
 
