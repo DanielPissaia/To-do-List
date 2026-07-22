@@ -17,29 +17,10 @@ const supabaseClient = window.supabase.createClient(
     }
 );
 
-// Elementos da agenda
-const taskInput =
-    document.getElementById("taskInput");
+// ================================
+// ELEMENTOS DA TELA DE LOGIN
+// ================================
 
-const taskList =
-    document.getElementById("taskList");
-
-const addTaskButton =
-    document.getElementById("addTaskButton");
-
-const clearTasksButton =
-    document.getElementById("clearTasksButton");
-
-const currentDateElement =
-    document.getElementById("currentDate");
-
-const taskDateInput =
-    document.getElementById("taskDate");
-
-const logoutButton =
-    document.getElementById("logoutButton");
-
-// Elementos da tela de login
 const loginSection =
     document.getElementById("loginSection");
 
@@ -58,159 +39,278 @@ const loginButton =
 const loginMessage =
     document.getElementById("loginMessage");
 
-// Cópia temporária das tarefas carregadas do Supabase
+const logoutButton =
+    document.getElementById("logoutButton");
+
+// ================================
+// ELEMENTOS DO QUADRO
+// ================================
+
+const taskInput =
+    document.getElementById("taskInput");
+
+const taskCategory =
+    document.getElementById("taskCategory");
+
+const addTaskButton =
+    document.getElementById("addTaskButton");
+
+const importantList =
+    document.getElementById("importantList");
+
+const requiredList =
+    document.getElementById("requiredList");
+
+const wheneverList =
+    document.getElementById("wheneverList");
+
+const importantCount =
+    document.getElementById("importantCount");
+
+const requiredCount =
+    document.getElementById("requiredCount");
+
+const wheneverCount =
+    document.getElementById("wheneverCount");
+
+const dropZones =
+    document.querySelectorAll(".task-drop-zone");
+
+// Tarefas carregadas do Supabase
 let tasks = [];
 
-// Data atual do computador
-const today = new Date();
+// Tarefa que está sendo arrastada
+let draggedTaskId = null;
 
-const year = today.getFullYear();
+// Canal usado para atualização em tempo real
+let tasksRealtimeChannel = null;
 
-const month = String(
-    today.getMonth() + 1
-).padStart(2, "0");
-
-const day = String(
-    today.getDate()
-).padStart(2, "0");
-
-const todayFormatted =
-    `${year}-${month}-${day}`;
-
-// Deixa o calendário selecionado na data atual
-taskDateInput.value = todayFormatted;
-
-// Configura a aparência da data
-const options = {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "2-digit"
+// Relaciona cada categoria com sua coluna
+const categoryLists = {
+    important: importantList,
+    required: requiredList,
+    whenever: wheneverList
 };
 
-// Mostra a data atual no cartão
-currentDateElement.textContent =
-    today.toLocaleDateString(
-        "pt-BR",
-        options
-    );
+// ================================
+// MOSTRAR E ESCONDER TELAS
+// ================================
 
-// Mostra somente as tarefas da data selecionada
-function renderTasks() {
-    taskList.innerHTML = "";
-
-    const selectedDate =
-        taskDateInput.value;
-
-    const tasksForDate = tasks.filter(
-        function (task) {
-            return task.date === selectedDate;
-        }
-    );
-
-    tasksForDate.forEach(function (task) {
-        const newTask =
-            document.createElement("li");
-
-        if (task.completed) {
-            newTask.classList.add("completed");
-        }
-
-        const taskTextElement =
-            document.createElement("span");
-
-        taskTextElement.textContent =
-            task.text;
-
-        taskTextElement.classList.add(
-            "task-text"
-        );
-
-        const taskCharacter =
-            document.createElement("span");
-
-        taskCharacter.classList.add(
-            "task-character"
-        );
-
-        newTask.appendChild(
-            taskTextElement
-        );
-
-        newTask.appendChild(
-            taskCharacter
-        );
-
-        // Concluir ou desfazer uma tarefa
-        newTask.addEventListener(
-            "click",
-            async function () {
-                const newCompletedState =
-                    !task.completed;
-
-                const { error } =
-                    await supabaseClient
-                        .from("tasks")
-                        .update({
-                            completed:
-                                newCompletedState
-                        })
-                        .eq("id", task.id);
-
-                if (error) {
-                    console.error(
-                        "Erro ao atualizar tarefa:",
-                        error
-                    );
-
-                    alert(
-                        "Não foi possível atualizar a tarefa."
-                    );
-
-                    return;
-                }
-
-                task.completed =
-                    newCompletedState;
-
-                newTask.classList.toggle(
-                    "completed",
-                    task.completed
-                );
-
-                if (task.completed) {
-                    taskCharacter.textContent =
-                        "🔨";
-                } else {
-                    taskCharacter.textContent =
-                        "↩️";
-                }
-
-                taskCharacter.classList.add(
-                    "character-animation"
-                );
-
-                setTimeout(function () {
-                    taskCharacter.classList.remove(
-                        "character-animation"
-                    );
-
-                    taskCharacter.textContent =
-                        "";
-                }, 600);
-            }
-        );
-
-        taskList.appendChild(newTask);
-    });
+function showLogin() {
+    loginSection.hidden = false;
+    appSection.hidden = true;
 }
 
-// Busca as tarefas salvas no Supabase
+function showApp() {
+    loginSection.hidden = true;
+    appSection.hidden = false;
+}
+
+// ================================
+// CRIAR CARTÃO DA TAREFA
+// ================================
+
+function createTaskCard(task) {
+    const taskCard =
+        document.createElement("article");
+
+    taskCard.classList.add("task-card");
+
+    // Permite que o cartão seja arrastado
+    taskCard.draggable = true;
+
+    taskCard.dataset.taskId =
+        String(task.id);
+
+    const taskContent =
+        document.createElement("div");
+
+    taskContent.classList.add(
+        "task-content"
+    );
+
+    const taskText =
+        document.createElement("span");
+
+    taskText.classList.add("task-text");
+    taskText.textContent = task.text;
+
+    const taskMeta =
+        document.createElement("span");
+
+    taskMeta.classList.add("task-meta");
+    taskMeta.textContent =
+        "Arraste para mudar a prioridade";
+
+    taskContent.appendChild(taskText);
+    taskContent.appendChild(taskMeta);
+
+    const taskActions =
+        document.createElement("div");
+
+    taskActions.classList.add(
+        "task-actions"
+    );
+
+    const deleteButton =
+        document.createElement("button");
+
+    deleteButton.type = "button";
+    deleteButton.textContent = "🗑";
+    deleteButton.title = "Excluir tarefa";
+
+    deleteButton.classList.add(
+        "task-action-button",
+        "delete-task-button"
+    );
+
+    deleteButton.addEventListener(
+        "click",
+        function (event) {
+            event.stopPropagation();
+
+            deleteTask(task.id);
+        }
+    );
+
+    taskActions.appendChild(deleteButton);
+
+    taskCard.appendChild(taskContent);
+    taskCard.appendChild(taskActions);
+
+    // Quando começa a arrastar
+    taskCard.addEventListener(
+        "dragstart",
+        function (event) {
+            draggedTaskId =
+                String(task.id);
+
+            taskCard.classList.add(
+                "dragging"
+            );
+
+            event.dataTransfer.effectAllowed =
+                "move";
+
+            event.dataTransfer.setData(
+                "text/plain",
+                draggedTaskId
+            );
+        }
+    );
+
+    // Quando termina de arrastar
+    taskCard.addEventListener(
+        "dragend",
+        function () {
+            draggedTaskId = null;
+
+            taskCard.classList.remove(
+                "dragging"
+            );
+
+            dropZones.forEach(
+                function (dropZone) {
+                    dropZone.classList.remove(
+                        "drag-over"
+                    );
+                }
+            );
+        }
+    );
+
+    return taskCard;
+}
+
+// ================================
+// MENSAGEM DE COLUNA VAZIA
+// ================================
+
+function createEmptyMessage() {
+    const message =
+        document.createElement("p");
+
+    message.classList.add(
+        "empty-column-message"
+    );
+
+    message.textContent =
+        "Nenhuma tarefa nesta prioridade.";
+
+    return message;
+}
+
+// ================================
+// MOSTRAR AS TAREFAS
+// ================================
+
+function renderTasks() {
+    importantList.innerHTML = "";
+    requiredList.innerHTML = "";
+    wheneverList.innerHTML = "";
+
+    const categoryCounts = {
+        important: 0,
+        required: 0,
+        whenever: 0
+    };
+
+    tasks.forEach(function (task) {
+        const category =
+            task.category || "required";
+
+        const categoryList =
+            categoryLists[category];
+
+        if (!categoryList) {
+            return;
+        }
+
+        const taskCard =
+            createTaskCard(task);
+
+        categoryList.appendChild(
+            taskCard
+        );
+
+        categoryCounts[category]++;
+    });
+
+    importantCount.textContent =
+        categoryCounts.important;
+
+    requiredCount.textContent =
+        categoryCounts.required;
+
+    wheneverCount.textContent =
+        categoryCounts.whenever;
+
+    Object.keys(categoryLists).forEach(
+        function (category) {
+            const list =
+                categoryLists[category];
+
+            if (list.children.length === 0) {
+                list.appendChild(
+                    createEmptyMessage()
+                );
+            }
+        }
+    );
+}
+
+// ================================
+// BUSCAR TAREFAS NO SUPABASE
+// ================================
+
 async function loadTasks() {
     const { data, error } =
         await supabaseClient
             .from("tasks")
-            .select("*")
+            .select(
+                "id, text, category, completed, created_at"
+            )
+            .eq("completed", false)
             .order("created_at", {
                 ascending: true
             });
@@ -232,15 +332,281 @@ async function loadTasks() {
         return {
             id: task.id,
             text: task.text,
-            date: task.task_date,
-            completed: task.completed
+            category:
+                task.category || "required",
+            completed: task.completed,
+            createdAt: task.created_at
         };
     });
 
     renderTasks();
 }
 
-// Realiza o login
+// ================================
+// ADICIONAR TAREFA
+// ================================
+
+async function addTask() {
+    const taskText =
+        taskInput.value.trim();
+
+    const selectedCategory =
+        taskCategory.value;
+
+    if (taskText === "") {
+        alert(
+            "Digite uma tarefa antes de adicionar."
+        );
+
+        taskInput.focus();
+        return;
+    }
+
+    addTaskButton.disabled = true;
+    addTaskButton.textContent =
+        "Adicionando...";
+
+    const { error } =
+        await supabaseClient
+            .from("tasks")
+            .insert({
+                text: taskText,
+                category: selectedCategory,
+                completed: false
+            });
+
+    addTaskButton.disabled = false;
+    addTaskButton.textContent =
+        "Adicionar tarefa";
+
+    if (error) {
+        console.error(
+            "Erro ao adicionar tarefa:",
+            error
+        );
+
+        alert(
+            "Não foi possível adicionar a tarefa."
+        );
+
+        return;
+    }
+
+    taskInput.value = "";
+    taskCategory.value = "required";
+    taskInput.focus();
+
+    await loadTasks();
+}
+
+// ================================
+// MOVER TAREFA DE PRIORIDADE
+// ================================
+
+async function moveTaskToCategory(
+    taskId,
+    newCategory
+) {
+    const task = tasks.find(
+        function (currentTask) {
+            return (
+                String(currentTask.id) ===
+                String(taskId)
+            );
+        }
+    );
+
+    if (!task) {
+        return;
+    }
+
+    if (task.category === newCategory) {
+        return;
+    }
+
+    const previousCategory =
+        task.category;
+
+    // Move imediatamente na tela
+    task.category = newCategory;
+    renderTasks();
+
+    const { error } =
+        await supabaseClient
+            .from("tasks")
+            .update({
+                category: newCategory
+            })
+            .eq("id", task.id);
+
+    if (error) {
+        console.error(
+            "Erro ao mudar prioridade:",
+            error
+        );
+
+        // Volta para a categoria anterior
+        task.category =
+            previousCategory;
+
+        renderTasks();
+
+        alert(
+            "Não foi possível mudar a prioridade."
+        );
+    }
+}
+
+// ================================
+// EXCLUIR UMA TAREFA
+// ================================
+
+async function deleteTask(taskId) {
+    const confirmDelete = confirm(
+        "Deseja realmente excluir esta tarefa?"
+    );
+
+    if (!confirmDelete) {
+        return;
+    }
+
+    const { error } =
+        await supabaseClient
+            .from("tasks")
+            .delete()
+            .eq("id", taskId);
+
+    if (error) {
+        console.error(
+            "Erro ao excluir tarefa:",
+            error
+        );
+
+        alert(
+            "Não foi possível excluir a tarefa."
+        );
+
+        return;
+    }
+
+    tasks = tasks.filter(
+        function (task) {
+            return (
+                String(task.id) !==
+                String(taskId)
+            );
+        }
+    );
+
+    renderTasks();
+}
+
+// ================================
+// ARRASTAR E SOLTAR
+// ================================
+
+dropZones.forEach(function (dropZone) {
+    dropZone.addEventListener(
+        "dragover",
+        function (event) {
+            // Necessário para permitir o drop
+            event.preventDefault();
+
+            event.dataTransfer.dropEffect =
+                "move";
+
+            dropZone.classList.add(
+                "drag-over"
+            );
+        }
+    );
+
+    dropZone.addEventListener(
+        "dragleave",
+        function (event) {
+            if (
+                !dropZone.contains(
+                    event.relatedTarget
+                )
+            ) {
+                dropZone.classList.remove(
+                    "drag-over"
+                );
+            }
+        }
+    );
+
+    dropZone.addEventListener(
+        "drop",
+        async function (event) {
+            event.preventDefault();
+
+            dropZone.classList.remove(
+                "drag-over"
+            );
+
+            const taskId =
+                event.dataTransfer.getData(
+                    "text/plain"
+                ) || draggedTaskId;
+
+            const newCategory =
+                dropZone.dataset.category;
+
+            await moveTaskToCategory(
+                taskId,
+                newCategory
+            );
+        }
+    );
+});
+
+// ================================
+// REALTIME
+// ================================
+
+function startRealtime() {
+    if (tasksRealtimeChannel) {
+        return;
+    }
+
+    tasksRealtimeChannel =
+        supabaseClient
+            .channel("tasks-priority-board")
+            .on(
+                "postgres_changes",
+                {
+                    event: "*",
+                    schema: "public",
+                    table: "tasks"
+                },
+                function () {
+                    loadTasks();
+                }
+            )
+            .subscribe();
+}
+
+async function stopRealtime() {
+    if (!tasksRealtimeChannel) {
+        return;
+    }
+
+    await supabaseClient.removeChannel(
+        tasksRealtimeChannel
+    );
+
+    tasksRealtimeChannel = null;
+}
+
+// O canal Realtime escuta INSERT, UPDATE e DELETE na
+// tabela. Assim, alterações feitas em outro computador
+// chamam loadTasks() automaticamente. :contentReference[oaicite:0]{index=0}
+
+// ================================
+// LOGIN
+// ================================
+
 async function login() {
     const email =
         loginEmail.value.trim();
@@ -261,7 +627,7 @@ async function login() {
     loginMessage.textContent =
         "Entrando...";
 
-    const { data, error } =
+    const { error } =
         await supabaseClient.auth
             .signInWithPassword({
                 email: email,
@@ -280,21 +646,22 @@ async function login() {
         return;
     }
 
-    console.log(
-        "Login realizado:",
-        data.user
-    );
-
     loginMessage.textContent = "";
-    loginSection.hidden = true;
-    appSection.hidden = false;
     loginPassword.value = "";
 
+    showApp();
+
     await loadTasks();
+    startRealtime();
 }
 
-// Encerra a sessão
+// ================================
+// LOGOUT
+// ================================
+
 async function logout() {
+    await stopRealtime();
+
     const { error } =
         await supabaseClient.auth.signOut({
             scope: "local"
@@ -314,19 +681,23 @@ async function logout() {
     }
 
     tasks = [];
-    taskList.innerHTML = "";
 
-    appSection.hidden = true;
-    loginSection.hidden = false;
+    importantList.innerHTML = "";
+    requiredList.innerHTML = "";
+    wheneverList.innerHTML = "";
 
     loginEmail.value = "";
     loginPassword.value = "";
     loginMessage.textContent = "";
 
+    showLogin();
     loginEmail.focus();
 }
 
-// Verifica se já existe uma sessão
+// ================================
+// VERIFICAR SESSÃO
+// ================================
+
 async function checkSession() {
     const { data, error } =
         await supabaseClient.auth
@@ -338,99 +709,29 @@ async function checkSession() {
             error
         );
 
-        loginSection.hidden = false;
-        appSection.hidden = true;
-
+        showLogin();
         return;
     }
 
     if (data.session) {
-        loginSection.hidden = true;
-        appSection.hidden = false;
+        showApp();
 
         await loadTasks();
+        startRealtime();
     } else {
-        loginSection.hidden = false;
-        appSection.hidden = true;
+        showLogin();
     }
 }
 
-// Adiciona uma nova tarefa no Supabase
-async function addTask() {
-    const taskText =
-        taskInput.value.trim();
+// ================================
+// EVENTOS DOS BOTÕES E TECLADO
+// ================================
 
-    const selectedDate =
-        taskDateInput.value;
-
-    if (taskText === "") {
-        alert(
-            "Por favor, adicione uma tarefa."
-        );
-
-        return;
-    }
-
-    if (selectedDate === "") {
-        alert(
-            "Por favor, selecione uma data."
-        );
-
-        return;
-    }
-
-    const { data, error } =
-        await supabaseClient
-            .from("tasks")
-            .insert({
-                text: taskText,
-                task_date: selectedDate,
-                completed: false
-            })
-            .select()
-            .single();
-
-    if (error) {
-        console.error(
-            "Erro ao adicionar tarefa:",
-            error
-        );
-
-        alert(
-            "Não foi possível salvar a tarefa."
-        );
-
-        return;
-    }
-
-    const newTask = {
-        id: data.id,
-        text: data.text,
-        date: data.task_date,
-        completed: data.completed
-    };
-
-    tasks.push(newTask);
-
-    renderTasks();
-
-    taskInput.value = "";
-    taskInput.focus();
-}
-
-// Adicionar clicando no botão
 addTaskButton.addEventListener(
     "click",
     addTask
 );
 
-// Sair clicando no botão
-logoutButton.addEventListener(
-    "click",
-    logout
-);
-
-// Adicionar pressionando Enter
 taskInput.addEventListener(
     "keydown",
     function (event) {
@@ -440,13 +741,11 @@ taskInput.addEventListener(
     }
 );
 
-// Entrar clicando no botão
 loginButton.addEventListener(
     "click",
     login
 );
 
-// Entrar pressionando Enter no campo de senha
 loginPassword.addEventListener(
     "keydown",
     function (event) {
@@ -456,63 +755,10 @@ loginPassword.addEventListener(
     }
 );
 
-// Mostrar as tarefas quando a data mudar
-taskDateInput.addEventListener(
-    "change",
-    function () {
-        renderTasks();
-    }
-);
-
-// Apagar as tarefas da data selecionada
-clearTasksButton.addEventListener(
+logoutButton.addEventListener(
     "click",
-    async function () {
-        const selectedDate =
-            taskDateInput.value;
-
-        const confirmDelete = confirm(
-            "Deseja apagar todas as tarefas desta data?"
-        );
-
-        if (!confirmDelete) {
-            return;
-        }
-
-        const { error } =
-            await supabaseClient
-                .from("tasks")
-                .delete()
-                .eq(
-                    "task_date",
-                    selectedDate
-                );
-
-        if (error) {
-            console.error(
-                "Erro ao apagar tarefas:",
-                error
-            );
-
-            alert(
-                "Não foi possível apagar as tarefas."
-            );
-
-            return;
-        }
-
-        tasks = tasks.filter(
-            function (task) {
-                return (
-                    task.date !==
-                    selectedDate
-                );
-            }
-        );
-
-        renderTasks();
-    }
+    logout
 );
 
-// Verifica o login quando a página abrir
+// Verifica a sessão quando a página abre
 checkSession();

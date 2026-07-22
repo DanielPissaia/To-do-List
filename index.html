@@ -44,15 +44,202 @@
             <p id="loginMessage"></p>
         </section>
 
-        <!-- Área principal da agenda -->
-        <section id="appSection" hidden>
+    <section id="appSection" hidden>
 
-            <p id="currentDate"></p>
+        <header class="app-header">
+            <div class="app-title">
+                <span class="app-icon">✓</span>
 
-            <h1>Boa do dia</h1>
+                <div>
+                    <h1> Organizadora TI </h1>
+                    <p> Organizar tarefas do dia e suas prioridades</p>
 
-            <button id="logoutButton" type="button">
-                Sair
+                </div>
+            </div>
+
+            <button
+            id="logoutButton"
+            type="button"
+            class="logout-button"
+        
+            >
+        Sair
+        </button>
+        </header>
+
+        <div class="task-creator">
+            <intup
+            type="text"
+            id="Taskinput"
+            placeholder="Digite uma nova tarefa"
+            autocomplete="off"
+            >
+        <select id="taskCategory">
+
+        <option value="important">
+            Mais Importante
+        </option>
+        
+        <option value="required" selected>
+            Tarefas pendentes
+        </option>
+
+        <option value="whenever">
+            Fazer com o tempo
+        </option>
+
+        <button
+        id="addTaskButton"
+        type="button"
+        >
+           Adicionar tarefa
+    </button>
+</div>
+
+        <!-- Coluna: Mais importante-->
+         
+        <section
+         class="priority-column important-column"
+         data-category="important"
+         >
+        
+        <header class="column-header">
+            <div>
+                <h2> Mais importante</h2>
+
+                <p>
+                    Tarefas urgentes/necessárias.
+                </p>
+            </div>
+
+            <span
+            id="ImportantCount"
+            class="task-count"
+            >
+        0
+        </span>
+</header>
+
+<div
+id="ImportantList"
+class="task-drop-zone"
+data-category="important"
+
+></div>
+
+</section>
+
+<!-- Coluna: Precisa ser feito-->
+ <section
+ class="priority-column required-column"
+ data-category="required"
+ >
+
+    <hander class="column-header">
+<div>
+
+    <h2> Precisa ser feito </h2>
+
+    <p>
+Tarefas necessárias, mas não urgentes
+    </p>
+
+    </div>
+
+    <span
+    id="requiredCount"
+    class="task-count"
+    >
+
+    0
+
+    </span>
+</header>
+
+<div    
+id="importantList"
+class="task-drop-zone"
+data-category="importante"
+
+></div>
+</section>
+
+<!-- Coluna: Preicisa ser feito-->
+ <Section
+ class="priority-column required-column"
+ data-category="required"
+
+ >
+
+<header class="column-header">
+    <div>
+<h2>Precisa ser feito</h2>
+
+<p>
+
+    Tarefas necessárias, mas não urgentes
+</p>
+    </div>
+
+    <span
+    id="requiredCount"
+    class="task-count"
+    >
+
+    0
+
+</span>
+</header>
+
+<div 
+id="requiredList"
+class="task-drop-zone"
+data-category="required"
+
+></div>
+
+</Section>
+
+<!-- Coluna: Quando tiver tempo -->
+
+<section
+class="priority-column whenever-column"
+data-category="whenever"
+>
+
+<header class="column-header">
+
+<div>
+    <h2> Fazer quando tiver tempo </h2>
+<p>
+
+    Melhorias e atividades sem urgência
+</p>
+
+</div>
+<span
+id="wheneverCount"
+class="task-count"
+
+>
+0
+</span>
+</header>
+
+<div
+id="wheneverList"
+class="task-drop-zone"
+data-category="whenever"
+></div>
+</section>
+</div>
+
+</section>
+
+
+
+
+
             </button>
 
             <div class="date-selector">
@@ -60,30 +247,7 @@
                     Selecione a data:
                 </label>
 
-                <input
-                    type="date"
-                    id="taskDate"
-                >
-            </div>
-
-            <div class="task-form">
-                <input
-                    type="text"
-                    id="taskInput"
-                    placeholder="Digite a boa de hoje"
-                >
-
-                <button id="addTaskButton" type="button">
-                    Adicionar
-                </button>
-
-                <button id="clearTasksButton" type="button">
-                    Limpar
-                </button>
-            </div>
-
-            <ul id="taskList"></ul>
-        </section>
+          
 
     </main>
 
