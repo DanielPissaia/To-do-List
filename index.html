@@ -9,380 +9,459 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Controle de Contas TI</title>
+    <title>Organizadora TI</title>
 
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+    <main class="container">
 
-    <section class="login-screen" id="loginScreen">
+        <!-- Área de login -->
+        <section id="loginSection">
+            <h2>Entrar na Organizadora TI</h2>
 
-    <div class="login-card">
+            <label for="loginEmail">
+                E-mail
+            </label>
 
-        <div class="login-logo">🔐</div>
+            <input
+                type="email"
+                id="loginEmail"
+                placeholder="Digite seu e-mail"
+                autocomplete="email"
+            >
 
-        <h1>Controle de Contas TI</h1>
+            <label for="loginPassword">
+                Senha
+            </label>
 
-        <p>
-            Acesso exclusivo para a equipe de TI.
-        </p>
-
-        <form id="loginForm">
-
-            <div class="form-group">
-                <label for="loginEmail">
-                    E-mail
-                </label>
-
-                <input
-                    type="email"
-                    id="loginEmail"
-                    placeholder="seu.email@empresa.com.br"
-                    autocomplete="email"
-                    required
-                >
-            </div>
-
-            <div class="form-group">
-                <label for="loginPassword">
-                    Senha
-                </label>
-
-                <input
-                    type="password"
-                    id="loginPassword"
-                    placeholder="Digite sua senha"
-                    autocomplete="current-password"
-                    minlength="6"
-                    required
-                >
-            </div>
-
-            <p
-                class="login-message"
-                id="loginMessage"
-            ></p>
+            <input
+                type="password"
+                id="loginPassword"
+                placeholder="Digite sua senha"
+                autocomplete="current-password"
+            >
 
             <button
-                type="submit"
-                class="primary-button login-button"
                 id="loginButton"
+                type="button"
             >
                 Entrar
             </button>
 
-        </form>
+            <p id="loginMessage"></p>
+        </section>
 
-    </div>
+        <!-- Área principal -->
+       <section id="appSection" hidden>
+
+    <header class="app-header">
+        <div class="app-title">
+            <span class="app-icon">✓</span>
+
+            <div>
+                <h1>Organizadora TI</h1>
+
+                <p>
+                    Organize as tarefas e acompanhe o histórico de resoluções
+                </p>
+            </div>
+        </div>
+
+        <button
+            id="logoutButton"
+            type="button"
+            class="logout-button"
+        >
+            Sair
+        </button>
+    </header>
+
+    <!-- Navegação entre as telas -->
+    <nav class="app-tabs">
+        <button
+            id="pendingTabButton"
+            type="button"
+            class="tab-button active"
+        >
+            Tarefas pendentes
+        </button>
+
+        <button
+            id="historyTabButton"
+            type="button"
+            class="tab-button"
+        >
+            Histórico
+        </button>
+    </nav>
+
+    <!-- Tela das tarefas pendentes -->
+    <section id="pendingView">
+
+        <div class="task-creator">
+            <input
+                type="text"
+                id="taskInput"
+                placeholder="Digite uma nova tarefa"
+                autocomplete="off"
+            >
+
+            <select id="taskCategory">
+                <option value="important">
+                    Mais importante
+                </option>
+
+                <option
+                    value="required"
+                    selected
+                >
+                    Precisa ser feito
+                </option>
+
+                <option value="whenever">
+                    Fazer quando tiver tempo
+                </option>
+            </select>
+
+            <button
+                id="addTaskButton"
+                type="button"
+            >
+                Adicionar tarefa
+            </button>
+        </div>
+
+        <div class="priority-board">
+
+            <!-- Mais importante -->
+            <section
+                class="priority-column important-column"
+                data-category="important"
+            >
+                <header class="column-header">
+                    <div>
+                        <h2>🚩 Mais importante</h2>
+
+                        <p>
+                            Tarefas urgentes ou de impacto imediato
+                        </p>
+                    </div>
+
+                    <span
+                        id="importantCount"
+                        class="task-count"
+                    >
+                        0
+                    </span>
+                </header>
+
+                <div
+                    id="importantList"
+                    class="task-drop-zone"
+                    data-category="important"
+                ></div>
+            </section>
+
+            <!-- Precisa ser feito -->
+            <section
+                class="priority-column required-column"
+                data-category="required"
+            >
+                <header class="column-header">
+                    <div>
+                        <h2>📋 Precisa ser feito</h2>
+
+                        <p>
+                            Tarefas necessárias, mas não urgentes
+                        </p>
+                    </div>
+
+                    <span
+                        id="requiredCount"
+                        class="task-count"
+                    >
+                        0
+                    </span>
+                </header>
+
+                <div
+                    id="requiredList"
+                    class="task-drop-zone"
+                    data-category="required"
+                ></div>
+            </section>
+
+            <!-- Fazer quando tiver tempo -->
+            <section
+                class="priority-column whenever-column"
+                data-category="whenever"
+            >
+                <header class="column-header">
+                    <div>
+                        <h2>◷ Fazer quando tiver tempo</h2>
+
+                        <p>
+                            Melhorias e atividades sem urgência
+                        </p>
+                    </div>
+
+                    <span
+                        id="wheneverCount"
+                        class="task-count"
+                    >
+                        0
+                    </span>
+                </header>
+
+                <div
+                    id="wheneverList"
+                    class="task-drop-zone"
+                    data-category="whenever"
+                ></div>
+            </section>
+
+        </div>
+    </section>
+
+    <!-- Tela do histórico -->
+    <section id="historyView" hidden>
+
+        <header class="history-header">
+            <div>
+                <h2>Histórico de tarefas concluídas</h2>
+
+                <p>
+                    Consulte o que foi resolvido e quando
+                </p>
+            </div>
+        </header>
+
+        <div class="history-filters">
+            <input
+                type="search"
+                id="historySearch"
+                placeholder="Buscar tarefa no histórico"
+                autocomplete="off"
+            >
+
+            <select id="historyPeriod">
+                <option value="all">
+                    Todo o período
+                </option>
+
+                <option value="today">
+                    Concluídas hoje
+                </option>
+
+                <option value="week">
+                    Esta semana
+                </option>
+
+                <option value="month">
+                    Este mês
+                </option>
+            </select>
+        </div>
+
+        <div class="history-table-wrapper">
+            <div class="history-table-header">
+                <span>Tarefa</span>
+                <span>Prioridade</span>
+                <span>Concluída em</span>
+            </div>
+
+            <div id="historyList">
+                <p class="empty-history-message">
+                    Nenhuma tarefa foi concluída ainda.
+                </p>
+            </div>
+        </div>
+
+        <div class="history-summary">
+
+            <article class="summary-card">
+                <span class="summary-icon">▣</span>
+
+                <div>
+                    <span class="summary-label">
+                        Concluídas hoje
+                    </span>
+
+                    <strong id="completedTodayCount">
+                        0
+                    </strong>
+                </div>
+            </article>
+
+            <article class="summary-card">
+                <span class="summary-icon">↗</span>
+
+                <div>
+                    <span class="summary-label">
+                        Esta semana
+                    </span>
+
+                    <strong id="completedWeekCount">
+                        0
+                    </strong>
+                </div>
+            </article>
+
+            <article class="summary-card">
+                <span class="summary-icon">✓</span>
+
+                <div>
+                    <span class="summary-label">
+                        Total no histórico
+                    </span>
+
+                    <strong id="completedTotalCount">
+                        0
+                    </strong>
+                </div>
+            </article>
+
+        </div>
+    </section>
 
 </section>
 
-    <aside class="sidebar app-private" id="sidebar">
+    </main>
 
-        <div class="logo-area">
-            <div class="logo-icon">☰</div>
+    <!-- Janela para editar uma tarefa -->
+<div id="editTaskModal" class="edit-modal" hidden>
 
-            <h1>
-                Controle de<br>
-                Contas TI
-            </h1>
-        </div>
+    <div
+        id="editModalBackdrop"
+        class="edit-modal-backdrop"
+    ></div>
 
-        <nav class="menu">
-
-    <button class="menu-item active" data-view="overview">
-        🏠
-        <span>Visão Geral</span>
-    </button>
-
-    <button class="menu-item" data-view="sopal">
-        🏢
-        <span>Sopal</span>
-    </button>
-
-    <button class="menu-item" data-view="gramado">
-        🏢
-        <span>Gramado</span>
-    </button>
-
-    <button class="menu-item" data-view="accounts">
-        📄
-        <span>Contas</span>
-    </button>
-
-    <button class="menu-item" data-view="history">
-        🕘
-        <span>Histórico</span>
-    </button>
-
-</nav>
-
-<div class="sidebar-user">
-
-    <div class="logged-user">
-        <span>Usuário conectado</span>
-
-        <strong id="loggedUserEmail">
-            carregando...
-        </strong>
-    </div>
-
-    <button
-        type="button"
-        class="logout-button"
-        id="logoutButton"
+    <section
+        class="edit-modal-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="editModalTitle"
     >
-        Sair
-    </button>
-
-</div>
-
-    </aside>
-
-<main class="main-content app-private" id="mainContent">
-        <header class="page-header">
-
+        <header class="edit-modal-header">
             <div>
-                <h2>Controle de contas Ti</h2>
+                <h2 id="editModalTitle">
+                    Editar tarefa
+                </h2>
 
                 <p>
-                    Acompanhe as contas do mês e marque como
-                    entregue ou pendente
+                    Altere a descrição, a prioridade ou a observação.
                 </p>
             </div>
 
             <button
-                id="openAccountFormButton"
-                class="primary-button"
-            >
-                + Nova Conta
-            </button>
-
-        </header>
-
-        <section class="summary">
-
-            <article class="summary-card">
-                <div class="summary-icon">📄</div>
-
-                <div>
-                    <p>Contas do mês</p>
-                    <strong id="totalAccounts">0</strong>
-                </div>
-            </article>
-
-            <article class="summary-card">
-                <div class="summary-icon pending-icon">🕘</div>
-
-                <div>
-                    <p>Pendentes</p>
-                    <strong id="pendingAccounts">0</strong>
-                </div>
-            </article>
-
-            <article class="summary-card">
-                <div class="summary-icon delivered-icon">✓</div>
-
-                <div>
-                    <p>Entregues</p>
-                    <strong id="deliveredAccounts">0</strong>
-                </div>
-            </article>
-
-            <article class="summary-card">
-                <div class="summary-icon">📅</div>
-
-                <div>
-                    <p>Vencem esta semana</p>
-                    <strong id="weeklyAccounts">0</strong>
-                </div>
-            </article>
-
-        </section>
-
-        <section class="dashboard-content">
-
-            <div class="companies-area">
-
-                <section class="company-card" id="sopalSection">
-
-                    <h3>Sopal</h3>
-
-                    <div class="table-container">
-
-                        <table>
-
-                            <thead>
-                                <tr>
-                                    <th>Fornecedor</th>
-                                    <th>Descrição</th>
-                                    <th>Vencimento</th>
-                                    <th>Mês</th>
-                                    <th>Status</th>
-                                    <th>Ação</th>
-                                </tr>
-                            </thead>
-
-                            <tbody id="sopalAccounts">
-                                <!-- As contas da Sopal serão inseridas pelo JavaScript -->
-                            </tbody>
-
-                        </table>
-
-                    </div>
-
-                </section>
-
-                <section class="company-card" id="gramadoSection">
-
-                    <h3>Gramado</h3>
-
-                    <div class="table-container">
-
-                        <table>
-
-                            <thead>
-                                <tr>
-                                    <th>Fornecedor</th>
-                                    <th>Descrição</th>
-                                    <th>Vencimento</th>
-                                    <th>Mês</th>
-                                    <th>Status</th>
-                                    <th>Ação</th>
-                                </tr>
-                            </thead>
-
-                            <tbody id="gramadoAccounts">
-                                <!-- As contas de Gramado serão inseridas pelo JavaScript -->
-                            </tbody>
-
-                        </table>
-
-                    </div>
-
-                </section>
-
-            </div>
-
-
-
-        </section>
-
-    </main>
-
-    <div class="modal-overlay" id="accountModal">
-
-    <div class="modal">
-
-        <div class="modal-header">
-
-            <div>
-                <h2>Nova Conta</h2>
-                <p>Cadastre uma conta da Sopal ou Gramado.</p>
-            </div>
-
-            <button
+                id="closeEditModalButton"
+                class="edit-modal-close"
                 type="button"
-                class="close-modal-button"
-                id="closeAccountFormButton"
-                aria-label="Fechar formulário"
+                aria-label="Fechar janela de edição"
             >
                 ×
             </button>
+        </header>
 
-        </div>
+        <form id="editTaskForm">
 
-        <form id="accountForm">
+            <input
+                id="editTaskId"
+                type="hidden"
+            >
 
-            <div class="form-group">
-
-                <label for="accountCompany">
-                    Empresa
+            <div class="edit-form-group">
+                <label for="editTaskText">
+                    Tarefa
                 </label>
 
-                <select id="accountCompany" required>
-                    <option value="">Selecione uma empresa</option>
-                    <option value="Sopal">Sopal</option>
-                    <option value="Gramado">Gramado</option>
+                <input
+                    id="editTaskText"
+                    type="text"
+                    maxlength="200"
+                    autocomplete="off"
+                    required
+                >
+            </div>
+
+            <div class="edit-form-group">
+                <label for="editTaskCategory">
+                    Prioridade
+                </label>
+
+                <select
+                    id="editTaskCategory"
+                    required
+                >
+                    <option value="important">
+                        Mais importante
+                    </option>
+
+                    <option value="required">
+                        Precisa ser feito
+                    </option>
+
+                    <option value="whenever">
+                        Fazer quando tiver tempo
+                    </option>
                 </select>
-
             </div>
 
-            <div class="form-group">
+            <div class="edit-form-group">
+                <div class="edit-label-row">
+                    <label for="editTaskNotes">
+                        Observação
+                    </label>
 
-                <label for="accountSupplier">
-                    Fornecedor
-                </label>
+                    <span>
+                        Opcional
+                    </span>
+                </div>
 
-                <input
-                    type="text"
-                    id="accountSupplier"
-                    placeholder="Exemplo: Vivo"
-                    maxlength="80"
-                    required
-                >
+                <textarea
+                    id="editTaskNotes"
+                    maxlength="1000"
+                    rows="7"
+                    placeholder="Adicione informações importantes sobre esta tarefa..."
+                ></textarea>
 
+                <div class="edit-notes-footer">
+                    <span>
+                        Use este campo para registrar detalhes, pendências ou informações importantes.
+                    </span>
+
+                    <span id="editNotesCount">
+                        0/1000
+                    </span>
+                </div>
             </div>
 
-            <div class="form-group">
-
-                <label for="accountDescription">
-                    Descrição
-                </label>
-
-                <input
-                    type="text"
-                    id="accountDescription"
-                    placeholder="Exemplo: Telefonia"
-                    maxlength="120"
-                    required
-                >
-
-            </div>
-
-            <div class="form-group">
-
-                <label for="accountDueDate">
-                    Data de vencimento
-                </label>
-
-                <input
-                    type="date"
-                    id="accountDueDate"
-                    required
-                >
-
-            </div>
-
-            <div class="modal-actions">
-
+            <div class="edit-modal-actions">
                 <button
+                    id="cancelEditButton"
+                    class="cancel-edit-button"
                     type="button"
-                    class="secondary-button"
-                    id="cancelAccountFormButton"
                 >
                     Cancelar
                 </button>
 
                 <button
+                    id="saveEditButton"
+                    class="save-edit-button"
                     type="submit"
-                    class="primary-button"
                 >
-                    Salvar Conta
+                    Salvar alterações
                 </button>
-
             </div>
 
         </form>
-
-    </div>
-
+    </section>
 </div>
 
-   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="script.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
 </body>
 
 </html>

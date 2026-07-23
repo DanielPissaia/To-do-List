@@ -1,1051 +1,1610 @@
-// ========================================
-// SUPABASE
-// ========================================
+const supabaseUrl =
+    "https://kyuthnwxvinqryppzudn.supabase.co";
 
-const SUPABASE_URL =
-    "https://iwhczvimugtureydwohf.supabase.co";
+const supabaseKey =
+    "sb_publishable_P1vA8rELChIgt1UNN8yS1w_0atxa0se";
 
-const SUPABASE_PUBLIC_KEY =
-    "sb_publishable_K_L5ockr9tjD1BJQmUuzrQ_k7Py7QG_";
-
-if (!window.supabase) {
-    alert(
-        "A biblioteca do Supabase não carregou. Verifique o index.html."
-    );
-
-    throw new Error(
-        "A biblioteca window.supabase não foi encontrada."
-    );
-}
-
-const supabaseClient =
-    window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_PUBLIC_KEY
-    );
-
+const supabaseClient = window.supabase.createClient(
+    supabaseUrl,
+    supabaseKey,
+    {
+        auth: {
+            persistSession: true,
+            storage: window.sessionStorage,
+            autoRefreshToken: true,
+            detectSessionInUrl: true
+        }
+    }
+);
 
 // ========================================
-// CONFIGURAÇÕES
+// ELEMENTOS DO LOGIN
 // ========================================
 
-const STORAGE_KEY = "controleContasTi";
+const loginSection =
+    document.getElementById("loginSection");
 
-let accounts = loadAccounts();
-let currentView = "overview";
+const appSection =
+    document.getElementById("appSection");
 
+const loginEmail =
+    document.getElementById("loginEmail");
 
-// ========================================
-// ELEMENTOS DO HTML
-// ========================================
-
-const sopalAccountsElement =
-    document.querySelector("#sopalAccounts");
-
-const gramadoAccountsElement =
-    document.querySelector("#gramadoAccounts");
-
-const sopalSection =
-    document.querySelector("#sopalSection");
-
-const gramadoSection =
-    document.querySelector("#gramadoSection");
-
-const totalAccountsElement =
-    document.querySelector("#totalAccounts");
-
-const pendingAccountsElement =
-    document.querySelector("#pendingAccounts");
-
-const deliveredAccountsElement =
-    document.querySelector("#deliveredAccounts");
-
-const weeklyAccountsElement =
-    document.querySelector("#weeklyAccounts");
-
-const openAccountFormButton =
-    document.querySelector("#openAccountFormButton");
-
-const closeAccountFormButton =
-    document.querySelector("#closeAccountFormButton");
-
-const cancelAccountFormButton =
-    document.querySelector("#cancelAccountFormButton");
-
-const accountModal =
-    document.querySelector("#accountModal");
-
-const accountForm =
-    document.querySelector("#accountForm");
-
-const accountCompanyInput =
-    document.querySelector("#accountCompany");
-
-const accountSupplierInput =
-    document.querySelector("#accountSupplier");
-
-const accountDescriptionInput =
-    document.querySelector("#accountDescription");
-
-const accountDueDateInput =
-    document.querySelector("#accountDueDate");
-
-const menuButtons =
-    document.querySelectorAll(".menu-item");
-
-const loginScreen =
-    document.querySelector("#loginScreen");
-
-const loginForm =
-    document.querySelector("#loginForm");
-
-const loginEmailInput =
-    document.querySelector("#loginEmail");
-
-const loginPasswordInput =
-    document.querySelector("#loginPassword");
-
-const loginMessage =
-    document.querySelector("#loginMessage");
+const loginPassword =
+    document.getElementById("loginPassword");
 
 const loginButton =
-    document.querySelector("#loginButton");
+    document.getElementById("loginButton");
+
+const loginMessage =
+    document.getElementById("loginMessage");
 
 const logoutButton =
-    document.querySelector("#logoutButton");
-
-const loggedUserEmail =
-    document.querySelector("#loggedUserEmail");
-
-const sidebar =
-    document.querySelector("#sidebar");
-
-const mainContent =
-    document.querySelector("#mainContent");
-
+    document.getElementById("logoutButton");
 
 // ========================================
-// VERIFICAÇÃO DOS ELEMENTOS
+// ELEMENTOS DAS ABAS
 // ========================================
 
-function checkRequiredElements() {
-    const requiredElements = [
-        {
-            name: "Tela de login",
-            element: loginScreen
-        },
-        {
-            name: "Formulário de login",
-            element: loginForm
-        },
-        {
-            name: "Campo de e-mail",
-            element: loginEmailInput
-        },
-        {
-            name: "Campo de senha",
-            element: loginPasswordInput
-        },
-        {
-            name: "Mensagem do login",
-            element: loginMessage
-        },
-        {
-            name: "Botão entrar",
-            element: loginButton
-        },
-        {
-            name: "Botão sair",
-            element: logoutButton
-        },
-        {
-            name: "Menu lateral",
-            element: sidebar
-        },
-        {
-            name: "Conteúdo principal",
-            element: mainContent
-        },
-        {
-            name: "Tabela da Sopal",
-            element: sopalAccountsElement
-        },
-        {
-            name: "Tabela de Gramado",
-            element: gramadoAccountsElement
-        },
-        {
-            name: "Seção da Sopal",
-            element: sopalSection
-        },
-        {
-            name: "Seção de Gramado",
-            element: gramadoSection
-        },
-        {
-            name: "Botão Nova Conta",
-            element: openAccountFormButton
-        },
-        {
-            name: "Formulário Nova Conta",
-            element: accountForm
-        },
-        {
-            name: "Modal Nova Conta",
-            element: accountModal
-        }
-    ];
+const pendingTabButton =
+    document.getElementById("pendingTabButton");
 
-    const missingElements =
-        requiredElements.filter(
-            item => !item.element
-        );
+const historyTabButton =
+    document.getElementById("historyTabButton");
 
-    if (missingElements.length > 0) {
-        const missingNames =
-            missingElements
-                .map(item => item.name)
-                .join(", ");
+const pendingView =
+    document.getElementById("pendingView");
 
-        console.error(
-            "Elementos não encontrados no HTML:",
-            missingNames
-        );
+const historyView =
+    document.getElementById("historyView");
 
-        alert(
-            `Alguns elementos não foram encontrados no HTML: ${missingNames}`
-        );
+// ========================================
+// ELEMENTOS DAS TAREFAS PENDENTES
+// ========================================
 
-        return false;
+const taskInput =
+    document.getElementById("taskInput");
+
+const taskCategory =
+    document.getElementById("taskCategory");
+
+const addTaskButton =
+    document.getElementById("addTaskButton");
+
+const importantList =
+    document.getElementById("importantList");
+
+const requiredList =
+    document.getElementById("requiredList");
+
+const wheneverList =
+    document.getElementById("wheneverList");
+
+const importantCount =
+    document.getElementById("importantCount");
+
+const requiredCount =
+    document.getElementById("requiredCount");
+
+const wheneverCount =
+    document.getElementById("wheneverCount");
+
+const dropZones =
+    document.querySelectorAll(".task-drop-zone");
+
+// ========================================
+// ELEMENTOS DO HISTÓRICO
+// ========================================
+
+const historySearch =
+    document.getElementById("historySearch");
+
+const historyPeriod =
+    document.getElementById("historyPeriod");
+
+const historyList =
+    document.getElementById("historyList");
+
+const completedTodayCount =
+    document.getElementById("completedTodayCount");
+
+const completedWeekCount =
+    document.getElementById("completedWeekCount");
+
+const completedTotalCount =
+    document.getElementById("completedTotalCount");
+
+    // ========================================
+// ELEMENTOS DA EDIÇÃO
+// ========================================
+
+const editTaskModal =
+    document.getElementById("editTaskModal");
+
+const editModalBackdrop =
+    document.getElementById("editModalBackdrop");
+
+const closeEditModalButton =
+    document.getElementById("closeEditModalButton");
+
+const cancelEditButton =
+    document.getElementById("cancelEditButton");
+
+const editTaskForm =
+    document.getElementById("editTaskForm");
+
+const editTaskId =
+    document.getElementById("editTaskId");
+
+const editTaskText =
+    document.getElementById("editTaskText");
+
+const editTaskCategory =
+    document.getElementById("editTaskCategory");
+
+const editTaskNotes =
+    document.getElementById("editTaskNotes");
+
+const editNotesCount =
+    document.getElementById("editNotesCount");
+
+const saveEditButton =
+    document.getElementById("saveEditButton");
+
+// ========================================
+// VARIÁVEIS DO SISTEMA
+// ========================================
+
+let tasks = [];
+
+let draggedTaskId = null;
+
+let tasksRealtimeChannel = null;
+
+const openNotesTaskIds = new Set();
+
+// Liga cada categoria à sua coluna
+const categoryLists = {
+    important: importantList,
+    required: requiredList,
+    whenever: wheneverList
+};
+
+// Nomes exibidos no histórico
+const categoryLabels = {
+    important: "Mais importante",
+    required: "Precisa ser feito",
+    whenever: "Fazer quando tiver tempo"
+};
+
+// ========================================
+// CONTROLE DAS TELAS
+// ========================================
+
+function showLogin() {
+    loginSection.hidden = false;
+    appSection.hidden = true;
+}
+
+function showApp() {
+    loginSection.hidden = true;
+    appSection.hidden = false;
+}
+
+function showPendingView() {
+    pendingView.hidden = false;
+    historyView.hidden = true;
+
+    pendingTabButton.classList.add("active");
+    historyTabButton.classList.remove("active");
+}
+
+function showHistoryView() {
+    pendingView.hidden = true;
+    historyView.hidden = false;
+
+    pendingTabButton.classList.remove("active");
+    historyTabButton.classList.add("active");
+
+    renderHistory();
+}
+
+// ========================================
+// MENSAGEM DE COLUNA VAZIA
+// ========================================
+
+function createEmptyColumnMessage() {
+    const message =
+        document.createElement("p");
+
+    message.classList.add(
+        "empty-column-message"
+    );
+
+    message.textContent =
+        "Nenhuma tarefa nesta prioridade.";
+
+    return message;
+}
+
+// ========================================
+// CRIAR CARTÃO DE TAREFA PENDENTE
+// ========================================
+
+function createTaskCard(task) {
+    const taskId = String(task.id);
+
+    const hasNotes =
+        typeof task.notes === "string" &&
+        task.notes.trim() !== "";
+
+    const taskCard =
+        document.createElement("article");
+
+    taskCard.classList.add("task-card");
+    taskCard.draggable = true;
+    taskCard.dataset.taskId = taskId;
+
+    if (openNotesTaskIds.has(taskId)) {
+        taskCard.classList.add("notes-open");
     }
 
-    return true;
-}
+    const taskMain =
+        document.createElement("div");
 
+    taskMain.classList.add("task-card-main");
 
-// ========================================
-// ARMAZENAMENTO LOCAL
-// ========================================
+    const taskHeader =
+        document.createElement("div");
 
-function loadAccounts() {
-    try {
-        const savedAccounts =
-            localStorage.getItem(STORAGE_KEY);
+    taskHeader.classList.add("task-card-header");
 
-        if (!savedAccounts) {
-            return [];
+    const taskBody =
+        document.createElement("div");
+
+    taskBody.classList.add("task-card-body");
+
+    const taskText =
+        document.createElement("span");
+
+    taskText.classList.add("task-text");
+    taskText.textContent = task.text;
+
+    const taskMeta =
+        document.createElement("span");
+
+    taskMeta.classList.add("task-meta");
+    taskMeta.textContent =
+        "Arraste para mudar a prioridade";
+
+    taskBody.appendChild(taskText);
+    taskBody.appendChild(taskMeta);
+
+    const taskActions =
+        document.createElement("div");
+
+    taskActions.classList.add("task-actions");
+
+    // Botão editar
+    const editButton =
+        document.createElement("button");
+
+    editButton.type = "button";
+    editButton.textContent = "✏️";
+    editButton.title = "Editar tarefa";
+
+    editButton.classList.add(
+        "task-action-button",
+        "edit-task-button"
+    );
+
+    editButton.addEventListener(
+        "click",
+        function (event) {
+            event.stopPropagation();
+
+            openEditTaskModal(task.id);
         }
+    );
 
-        const parsedAccounts =
-            JSON.parse(savedAccounts);
+    // Botão observação
+    const notesButton =
+        document.createElement("button");
 
-        if (!Array.isArray(parsedAccounts)) {
-            return [];
+    notesButton.type = "button";
+    notesButton.textContent = "💬";
+
+    notesButton.classList.add(
+        "task-action-button",
+        "toggle-notes-button"
+    );
+
+    if (hasNotes) {
+        notesButton.classList.add("has-notes");
+
+        notesButton.title =
+            "Mostrar ou esconder observação";
+
+        notesButton.setAttribute(
+            "aria-expanded",
+            String(
+                openNotesTaskIds.has(taskId)
+            )
+        );
+    } else {
+        notesButton.title =
+            "Adicionar observação";
+    }
+
+    notesButton.addEventListener(
+        "click",
+        function (event) {
+            event.stopPropagation();
+
+            if (!hasNotes) {
+                openEditTaskModal(
+                    task.id,
+                    true
+                );
+
+                return;
+            }
+
+            if (
+                openNotesTaskIds.has(
+                    taskId
+                )
+            ) {
+                openNotesTaskIds.delete(
+                    taskId
+                );
+            } else {
+                openNotesTaskIds.add(
+                    taskId
+                );
+            }
+
+            renderPendingTasks();
         }
+    );
 
-        return parsedAccounts;
-    } catch (error) {
-        console.error(
-            "Não foi possível carregar as contas:",
-            error
+    // Botão concluir
+    const completeButton =
+        document.createElement("button");
+
+    completeButton.type = "button";
+    completeButton.textContent = "✓";
+    completeButton.title =
+        "Marcar como concluída";
+
+    completeButton.classList.add(
+        "task-action-button",
+        "complete-task-button"
+    );
+
+    completeButton.addEventListener(
+        "click",
+        function (event) {
+            event.stopPropagation();
+
+            completeTask(task.id);
+        }
+    );
+
+    // Botão excluir
+    const deleteButton =
+        document.createElement("button");
+
+    deleteButton.type = "button";
+    deleteButton.textContent = "🗑";
+    deleteButton.title =
+        "Excluir tarefa";
+
+    deleteButton.classList.add(
+        "task-action-button",
+        "delete-task-button"
+    );
+
+    deleteButton.addEventListener(
+        "click",
+        function (event) {
+            event.stopPropagation();
+
+            deleteTask(task.id);
+        }
+    );
+
+    taskActions.appendChild(editButton);
+    taskActions.appendChild(notesButton);
+    taskActions.appendChild(completeButton);
+    taskActions.appendChild(deleteButton);
+
+    taskHeader.appendChild(taskBody);
+    taskHeader.appendChild(taskActions);
+
+    taskMain.appendChild(taskHeader);
+
+    // Área da observação
+    if (hasNotes) {
+        const notesArea =
+            document.createElement("div");
+
+        notesArea.classList.add("task-notes");
+
+        notesArea.hidden =
+            !openNotesTaskIds.has(taskId);
+
+        const notesLabel =
+            document.createElement("span");
+
+        notesLabel.classList.add(
+            "task-notes-label"
         );
 
-        return [];
+        notesLabel.textContent =
+            "Observação:";
+
+        const notesText =
+            document.createElement("p");
+
+        notesText.classList.add(
+            "task-notes-text"
+        );
+
+        notesText.textContent =
+            task.notes;
+
+        notesArea.appendChild(notesLabel);
+        notesArea.appendChild(notesText);
+
+        taskMain.appendChild(notesArea);
     }
+
+    taskCard.appendChild(taskMain);
+
+    // Arrastar tarefa
+    taskCard.addEventListener(
+        "dragstart",
+        function (event) {
+            draggedTaskId = taskId;
+
+            taskCard.classList.add(
+                "dragging"
+            );
+
+            event.dataTransfer.effectAllowed =
+                "move";
+
+            event.dataTransfer.setData(
+                "text/plain",
+                taskId
+            );
+        }
+    );
+
+    taskCard.addEventListener(
+        "dragend",
+        function () {
+            draggedTaskId = null;
+
+            taskCard.classList.remove(
+                "dragging"
+            );
+
+            dropZones.forEach(
+                function (dropZone) {
+                    dropZone.classList.remove(
+                        "drag-over"
+                    );
+                }
+            );
+        }
+    );
+
+    return taskCard;
 }
 
+// ========================================
+// MOSTRAR TAREFAS PENDENTES
+// ========================================
 
-function saveAccounts() {
-    try {
-        localStorage.setItem(
-            STORAGE_KEY,
-            JSON.stringify(accounts)
-        );
-    } catch (error) {
-        console.error(
-            "Não foi possível salvar as contas:",
-            error
-        );
+function renderPendingTasks() {
+    importantList.innerHTML = "";
+    requiredList.innerHTML = "";
+    wheneverList.innerHTML = "";
 
-        alert(
-            "O navegador não conseguiu salvar as informações."
-        );
+    const categoryCounts = {
+        important: 0,
+        required: 0,
+        whenever: 0
+    };
+
+    const pendingTasks = tasks.filter(
+        function (task) {
+            return !task.completed;
+        }
+    );
+
+    pendingTasks.forEach(
+        function (task) {
+            const category =
+                task.category || "required";
+
+            const categoryList =
+                categoryLists[category];
+
+            if (!categoryList) {
+                return;
+            }
+
+            const taskCard =
+                createTaskCard(task);
+
+            categoryList.appendChild(
+                taskCard
+            );
+
+            categoryCounts[category]++;
+        }
+    );
+
+    importantCount.textContent =
+        categoryCounts.important;
+
+    requiredCount.textContent =
+        categoryCounts.required;
+
+    wheneverCount.textContent =
+        categoryCounts.whenever;
+
+    Object.keys(categoryLists).forEach(
+        function (category) {
+            const list =
+                categoryLists[category];
+
+            if (
+                list.children.length === 0
+            ) {
+                list.appendChild(
+                    createEmptyColumnMessage()
+                );
+            }
+        }
+    );
+}
+
+// ========================================
+// FORMATAR DATA DO HISTÓRICO
+// ========================================
+
+function formatCompletedDate(dateValue) {
+    if (!dateValue) {
+        return "Data não registrada";
     }
+
+    const date =
+        new Date(dateValue);
+
+    if (
+        Number.isNaN(date.getTime())
+    ) {
+        return "Data inválida";
+    }
+
+    return date.toLocaleString(
+        "pt-BR",
+        {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        }
+    );
 }
 
-
 // ========================================
-// SEGURANÇA DOS TEXTOS
+// DATAS UTILIZADAS NOS FILTROS
 // ========================================
 
-function escapeHTML(value) {
-    return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+function getStartOfToday() {
+    const date = new Date();
+
+    date.setHours(0, 0, 0, 0);
+
+    return date;
 }
 
+function getStartOfTomorrow() {
+    const date =
+        getStartOfToday();
 
-// ========================================
-// FORMATAÇÃO DAS DATAS
-// ========================================
+    date.setDate(
+        date.getDate() + 1
+    );
 
-function formatDate(dateString) {
-    const [year, month, day] =
-        dateString.split("-");
-
-    return `${day}/${month}/${year}`;
+    return date;
 }
 
+function getStartOfWeek() {
+    const date =
+        getStartOfToday();
 
-function formatMonth(dateString) {
-    const [year, month] =
-        dateString.split("-");
-
-    const monthNames = [
-        "Janeiro",
-        "Fevereiro",
-        "Março",
-        "Abril",
-        "Maio",
-        "Junho",
-        "Julho",
-        "Agosto",
-        "Setembro",
-        "Outubro",
-        "Novembro",
-        "Dezembro"
-    ];
-
-    return `${monthNames[Number(month) - 1]}/${year}`;
-}
-
-
-// ========================================
-// VENCIMENTOS
-// ========================================
-
-function getDaysUntilDueDate(dateString) {
-    const today = new Date();
-
-    today.setHours(0, 0, 0, 0);
-
-    const dueDate =
-        new Date(`${dateString}T00:00:00`);
+    const currentDay =
+        date.getDay();
 
     const difference =
-        dueDate.getTime() - today.getTime();
+        currentDay === 0
+            ? -6
+            : 1 - currentDay;
 
-    const millisecondsPerDay =
-        1000 * 60 * 60 * 24;
+    date.setDate(
+        date.getDate() + difference
+    );
 
-    return Math.round(
-        difference / millisecondsPerDay
+    return date;
+}
+
+function getStartOfMonth() {
+    const today = new Date();
+
+    return new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        1
     );
 }
 
+// ========================================
+// FILTRAR TAREFAS DO HISTÓRICO
+// ========================================
 
-function getDueDateClass(account) {
-    if (account.status === "delivered") {
-        return "";
+function getFilteredHistoryTasks() {
+    const searchText =
+        historySearch.value
+            .trim()
+            .toLowerCase();
+
+    const selectedPeriod =
+        historyPeriod.value;
+
+    let startDate = null;
+
+    if (selectedPeriod === "today") {
+        startDate =
+            getStartOfToday();
     }
 
-    const daysUntilDueDate =
-        getDaysUntilDueDate(account.dueDate);
-
-    if (daysUntilDueDate < 0) {
-        return "overdue";
+    if (selectedPeriod === "week") {
+        startDate =
+            getStartOfWeek();
     }
 
-    if (daysUntilDueDate <= 7) {
-        return "due-soon";
+    if (selectedPeriod === "month") {
+        startDate =
+            getStartOfMonth();
     }
 
-    return "";
-}
+    return tasks
+        .filter(function (task) {
+            return task.completed;
+        })
+        .filter(function (task) {
+            return task.text
+                .toLowerCase()
+                .includes(searchText);
+        })
+        .filter(function (task) {
+            if (!startDate) {
+                return true;
+            }
 
-
-// ========================================
-// STATUS
-// ========================================
-
-function getStatusInformation(account) {
-    if (account.status === "delivered") {
-        return {
-            text: "Entregue",
-            className: "status-delivered"
-        };
-    }
-
-    const daysUntilDueDate =
-        getDaysUntilDueDate(account.dueDate);
-
-    if (daysUntilDueDate < 0) {
-        return {
-            text: "Vencida",
-            className: "status-overdue"
-        };
-    }
-
-    return {
-        text: "Pendente",
-        className: "status-pending"
-    };
-}
-
-
-// ========================================
-// CRIAÇÃO DAS LINHAS
-// ========================================
-
-function createAccountRow(account) {
-    const statusInformation =
-        getStatusInformation(account);
-
-    const actionText =
-        account.status === "delivered"
-            ? "Marcar pendente"
-            : "Marcar entregue";
-
-    return `
-        <tr class="${getDueDateClass(account)}">
-
-            <td>
-                ${escapeHTML(account.supplier)}
-            </td>
-
-            <td>
-                ${escapeHTML(account.description)}
-            </td>
-
-            <td>
-                ${formatDate(account.dueDate)}
-            </td>
-
-            <td>
-                ${formatMonth(account.dueDate)}
-            </td>
-
-            <td>
-                <span
-                    class="status ${statusInformation.className}"
-                >
-                    ${statusInformation.text}
-                </span>
-            </td>
-
-            <td>
-                <button
-                    type="button"
-                    class="action-button"
-                    data-action="toggle-status"
-                    data-account-id="${account.id}"
-                >
-                    ${actionText}
-                </button>
-            </td>
-
-        </tr>
-    `;
-}
-
-
-// ========================================
-// FILTROS DO MENU
-// ========================================
-
-function getFilteredAccounts(company) {
-    let filteredAccounts =
-        accounts.filter(
-            account => account.company === company
-        );
-
-    if (currentView === "history") {
-        filteredAccounts =
-            filteredAccounts.filter(
-                account =>
-                    account.status === "delivered"
-            );
-    }
-
-    return filteredAccounts.sort(
-        (firstAccount, secondAccount) =>
-            firstAccount.dueDate.localeCompare(
-                secondAccount.dueDate
-            )
-    );
-}
-
-
-function updateVisibleSections() {
-    if (currentView === "sopal") {
-        sopalSection.style.display = "block";
-        gramadoSection.style.display = "none";
-
-        return;
-    }
-
-    if (currentView === "gramado") {
-        sopalSection.style.display = "none";
-        gramadoSection.style.display = "block";
-
-        return;
-    }
-
-    sopalSection.style.display = "block";
-    gramadoSection.style.display = "block";
-}
-
-
-// ========================================
-// EXIBIÇÃO DAS CONTAS
-// ========================================
-
-function renderCompanyAccounts(
-    companyAccounts,
-    element,
-    companyName
-) {
-    if (companyAccounts.length === 0) {
-        const message =
-            currentView === "history"
-                ? `Nenhuma conta entregue da ${companyName}.`
-                : `Nenhuma conta da ${companyName} cadastrada.`;
-
-        element.innerHTML = `
-            <tr>
-                <td
-                    colspan="6"
-                    class="empty-message"
-                >
-                    ${message}
-                </td>
-            </tr>
-        `;
-
-        return;
-    }
-
-    element.innerHTML =
-        companyAccounts
-            .map(createAccountRow)
-            .join("");
-}
-
-
-function renderAccounts() {
-    const sopalAccounts =
-        getFilteredAccounts("Sopal");
-
-    const gramadoAccounts =
-        getFilteredAccounts("Gramado");
-
-    renderCompanyAccounts(
-        sopalAccounts,
-        sopalAccountsElement,
-        "Sopal"
-    );
-
-    renderCompanyAccounts(
-        gramadoAccounts,
-        gramadoAccountsElement,
-        "Gramado"
-    );
-
-    updateVisibleSections();
-    updateSummary();
-}
-
-
-// ========================================
-// RESUMO
-// ========================================
-
-function updateSummary() {
-    const pendingAccounts =
-        accounts.filter(
-            account =>
-                account.status === "pending"
-        );
-
-    const deliveredAccounts =
-        accounts.filter(
-            account =>
-                account.status === "delivered"
-        );
-
-    const weeklyAccounts =
-        accounts.filter(account => {
-            if (account.status === "delivered") {
+            if (!task.completedAt) {
                 return false;
             }
 
-            const daysUntilDueDate =
-                getDaysUntilDueDate(account.dueDate);
+            const completedDate =
+                new Date(
+                    task.completedAt
+                );
 
             return (
-                daysUntilDueDate >= 0 &&
-                daysUntilDueDate <= 7
+                completedDate >=
+                startDate
+            );
+        })
+        .sort(function (
+            firstTask,
+            secondTask
+        ) {
+            const firstDate =
+                firstTask.completedAt
+                    ? new Date(
+                        firstTask.completedAt
+                    ).getTime()
+                    : 0;
+
+            const secondDate =
+                secondTask.completedAt
+                    ? new Date(
+                        secondTask.completedAt
+                    ).getTime()
+                    : 0;
+
+            return (
+                secondDate -
+                firstDate
             );
         });
-
-    totalAccountsElement.textContent =
-        accounts.length;
-
-    pendingAccountsElement.textContent =
-        pendingAccounts.length;
-
-    deliveredAccountsElement.textContent =
-        deliveredAccounts.length;
-
-    weeklyAccountsElement.textContent =
-        weeklyAccounts.length;
 }
-
 
 // ========================================
-// MODAL DE NOVA CONTA
+// CRIAR LINHA DO HISTÓRICO
 // ========================================
 
-function openAccountModal() {
-    accountForm.reset();
+function createHistoryRow(task) {
+    const historyRow =
+        document.createElement("div");
 
-    accountModal.classList.add("open");
-    document.body.classList.add("modal-open");
-
-    setTimeout(() => {
-        accountCompanyInput.focus();
-    }, 100);
-}
-
-
-function closeAccountModal() {
-    accountModal.classList.remove("open");
-    document.body.classList.remove("modal-open");
-
-    accountForm.reset();
-}
-
-
-// ========================================
-// AUTENTICAÇÃO
-// ========================================
-
-function showLoginScreen() {
-    loginScreen.classList.remove("hidden");
-
-    sidebar.classList.remove("visible");
-    mainContent.classList.remove("visible");
-
-    loginForm.reset();
-
-    loginMessage.textContent = "";
-    loginMessage.className = "login-message";
-}
-
-
-function showPrivateSystem(user) {
-    loginScreen.classList.add("hidden");
-
-    sidebar.classList.add("visible");
-    mainContent.classList.add("visible");
-
-    loggedUserEmail.textContent =
-        user?.email || "Usuário da TI";
-}
-
-
-function setLoginLoading(isLoading) {
-    loginButton.disabled = isLoading;
-
-    loginButton.textContent =
-        isLoading
-            ? "Entrando..."
-            : "Entrar";
-}
-
-
-function translateLoginError(error) {
-    const message =
-        error?.message?.toLowerCase() || "";
-
-    if (
-        message.includes(
-            "invalid login credentials"
-        )
-    ) {
-        return "E-mail ou senha incorretos.";
-    }
-
-    if (
-        message.includes("email not confirmed")
-    ) {
-        return "O e-mail ainda não foi confirmado.";
-    }
-
-    if (
-        message.includes("failed to fetch") ||
-        message.includes("network")
-    ) {
-        return "Não foi possível conectar ao Supabase.";
-    }
-
-    if (
-        message.includes("too many requests")
-    ) {
-        return "Muitas tentativas. Aguarde e tente novamente.";
-    }
-
-    return (
-        error?.message ||
-        "Não foi possível entrar. Verifique os dados."
+    historyRow.classList.add(
+        "history-row"
     );
+
+    const taskColumn =
+        document.createElement("div");
+
+    taskColumn.classList.add(
+        "history-task"
+    );
+
+    const checkIcon =
+        document.createElement("span");
+
+    checkIcon.classList.add(
+        "history-check-icon"
+    );
+
+    checkIcon.textContent = "✓";
+
+    const taskText =
+        document.createElement("span");
+
+    taskText.classList.add(
+        "history-task-text"
+    );
+
+    taskText.textContent =
+        task.text;
+
+    taskColumn.appendChild(
+        checkIcon
+    );
+
+    taskColumn.appendChild(
+        taskText
+    );
+
+    const priorityBadge =
+        document.createElement("span");
+
+    const category =
+        task.category || "required";
+
+    priorityBadge.classList.add(
+        "priority-badge",
+        category
+    );
+
+    priorityBadge.textContent =
+        categoryLabels[category] ||
+        "Sem prioridade";
+
+    const completedDate =
+        document.createElement("span");
+
+    completedDate.classList.add(
+        "history-date"
+    );
+
+    completedDate.textContent =
+        formatCompletedDate(
+            task.completedAt
+        );
+
+    historyRow.appendChild(
+        taskColumn
+    );
+
+    historyRow.appendChild(
+        priorityBadge
+    );
+
+    historyRow.appendChild(
+        completedDate
+    );
+
+    return historyRow;
 }
 
+// ========================================
+// MOSTRAR HISTÓRICO
+// ========================================
 
-async function handleLogin(event) {
-    event.preventDefault();
+function renderHistory() {
+    historyList.innerHTML = "";
 
-    const email =
-        loginEmailInput.value.trim();
+    const filteredTasks =
+        getFilteredHistoryTasks();
 
-    const password =
-        loginPasswordInput.value;
+    if (
+        filteredTasks.length === 0
+    ) {
+        const emptyMessage =
+            document.createElement("p");
 
-    if (!email || !password) {
-        loginMessage.textContent =
-            "Informe o e-mail e a senha.";
+        emptyMessage.classList.add(
+            "empty-history-message"
+        );
 
-        loginMessage.className =
-            "login-message error";
+        emptyMessage.textContent =
+            "Nenhuma tarefa encontrada no histórico.";
+
+        historyList.appendChild(
+            emptyMessage
+        );
+
+        updateHistorySummary();
 
         return;
     }
 
-    setLoginLoading(true);
+    filteredTasks.forEach(
+        function (task) {
+            const historyRow =
+                createHistoryRow(task);
 
-    loginMessage.textContent =
-        "Verificando acesso...";
-
-    loginMessage.className =
-        "login-message";
-
-    try {
-        const { data, error } =
-            await supabaseClient.auth
-                .signInWithPassword({
-                    email,
-                    password
-                });
-
-        if (error) {
-            throw error;
-        }
-
-        if (!data.user) {
-            throw new Error(
-                "O usuário não foi retornado pelo Supabase."
+            historyList.appendChild(
+                historyRow
             );
         }
+    );
 
-        loginMessage.textContent =
-            "Login realizado com sucesso.";
+    updateHistorySummary();
+}
 
-        loginMessage.className =
-            "login-message success";
+// ========================================
+// CONTADORES DO HISTÓRICO
+// ========================================
 
-        showPrivateSystem(data.user);
-        renderAccounts();
+function updateHistorySummary() {
+    const completedTasks =
+        tasks.filter(
+            function (task) {
+                return task.completed;
+            }
+        );
 
-    } catch (error) {
+    const todayStart =
+        getStartOfToday();
+
+    const tomorrowStart =
+        getStartOfTomorrow();
+
+    const weekStart =
+        getStartOfWeek();
+
+    const todayTasks =
+        completedTasks.filter(
+            function (task) {
+                if (!task.completedAt) {
+                    return false;
+                }
+
+                const completedDate =
+                    new Date(
+                        task.completedAt
+                    );
+
+                return (
+                    completedDate >=
+                        todayStart &&
+                    completedDate <
+                        tomorrowStart
+                );
+            }
+        );
+
+    const weekTasks =
+        completedTasks.filter(
+            function (task) {
+                if (!task.completedAt) {
+                    return false;
+                }
+
+                const completedDate =
+                    new Date(
+                        task.completedAt
+                    );
+
+                return (
+                    completedDate >=
+                    weekStart
+                );
+            }
+        );
+
+    completedTodayCount.textContent =
+        todayTasks.length;
+
+    completedWeekCount.textContent =
+        weekTasks.length;
+
+    completedTotalCount.textContent =
+        completedTasks.length;
+}
+
+// ========================================
+// ATUALIZAR TODAS AS TELAS
+// ========================================
+
+function renderAll() {
+    renderPendingTasks();
+    renderHistory();
+}
+
+// ========================================
+// BUSCAR TAREFAS NO SUPABASE
+// ========================================
+
+async function loadTasks() {
+    const { data, error } =
+        await supabaseClient
+            .from("tasks")
+            .select(
+                `
+                id,
+                text,
+                category,
+                completed,
+                created_at,
+                completed_at
+                `
+            )
+            .order("created_at", {
+                ascending: true
+            });
+
+    if (error) {
         console.error(
-            "Erro completo no login:",
+            "Erro ao carregar tarefas:",
+            error
+        );
+
+        alert(
+            `Não foi possível carregar as tarefas: ${error.message}`
+        );
+
+        return;
+    }
+
+    tasks = data.map(
+        function (task) {
+            return {
+                id: task.id,
+                text: task.text,
+                category:
+                    task.category ||
+                    "required",
+                completed:
+                    Boolean(
+                        task.completed
+                    ),
+                createdAt:
+                    task.created_at,
+                completedAt:
+                    task.completed_at
+            };
+        }
+    );
+
+    renderAll();
+}
+
+// ========================================
+// ADICIONAR NOVA TAREFA
+// ========================================
+
+async function addTask() {
+    const taskText =
+        taskInput.value.trim();
+
+    const selectedCategory =
+        taskCategory.value;
+
+    if (taskText === "") {
+        alert(
+            "Digite uma tarefa antes de adicionar."
+        );
+
+        taskInput.focus();
+
+        return;
+    }
+
+    addTaskButton.disabled = true;
+
+    addTaskButton.textContent =
+        "Adicionando...";
+
+    const { error } =
+        await supabaseClient
+            .from("tasks")
+            .insert({
+                text: taskText,
+                category:
+                    selectedCategory,
+                completed: false,
+                completed_at: null
+            });
+
+    addTaskButton.disabled = false;
+
+    addTaskButton.textContent =
+        "Adicionar tarefa";
+
+    if (error) {
+        console.error(
+            "Erro ao adicionar tarefa:",
+            error
+        );
+
+        alert(
+            `Não foi possível adicionar a tarefa: ${error.message}`
+        );
+
+        return;
+    }
+
+    taskInput.value = "";
+
+    taskCategory.value =
+        "required";
+
+    taskInput.focus();
+
+    await loadTasks();
+}
+
+// ========================================
+// CONCLUIR TAREFA
+// ========================================
+
+async function completeTask(taskId) {
+    const task = tasks.find(
+        function (currentTask) {
+            return (
+                String(
+                    currentTask.id
+                ) ===
+                String(taskId)
+            );
+        }
+    );
+
+    if (!task) {
+        return;
+    }
+
+    const confirmComplete =
+        confirm(
+            `Marcar como concluída?\n\n${task.text}`
+        );
+
+    if (!confirmComplete) {
+        return;
+    }
+
+    const completedAt =
+        new Date().toISOString();
+
+    const { error } =
+        await supabaseClient
+            .from("tasks")
+            .update({
+                completed: true,
+                completed_at:
+                    completedAt
+            })
+            .eq("id", task.id);
+
+    if (error) {
+        console.error(
+            "Erro ao concluir tarefa:",
+            error
+        );
+
+        alert(
+            `Não foi possível concluir a tarefa: ${error.message}`
+        );
+
+        return;
+    }
+
+    await loadTasks();
+}
+
+// ========================================
+// MOVER TAREFA DE PRIORIDADE
+// ========================================
+
+async function moveTaskToCategory(
+    taskId,
+    newCategory
+) {
+    const validCategories = [
+        "important",
+        "required",
+        "whenever"
+    ];
+
+    if (
+        !validCategories.includes(
+            newCategory
+        )
+    ) {
+        return;
+    }
+
+    const task = tasks.find(
+        function (currentTask) {
+            return (
+                String(
+                    currentTask.id
+                ) ===
+                String(taskId)
+            );
+        }
+    );
+
+    if (
+        !task ||
+        task.completed
+    ) {
+        return;
+    }
+
+    if (
+        task.category ===
+        newCategory
+    ) {
+        return;
+    }
+
+    const previousCategory =
+        task.category;
+
+    // Atualiza primeiro na tela
+    task.category =
+        newCategory;
+
+    renderPendingTasks();
+
+    const { error } =
+        await supabaseClient
+            .from("tasks")
+            .update({
+                category:
+                    newCategory
+            })
+            .eq("id", task.id);
+
+    if (error) {
+        console.error(
+            "Erro ao mudar prioridade:",
+            error
+        );
+
+        task.category =
+            previousCategory;
+
+        renderPendingTasks();
+
+        alert(
+            `Não foi possível mudar a prioridade: ${error.message}`
+        );
+    }
+}
+
+// ========================================
+// EXCLUIR TAREFA
+// ========================================
+
+async function deleteTask(taskId) {
+    const task = tasks.find(
+        function (currentTask) {
+            return (
+                String(
+                    currentTask.id
+                ) ===
+                String(taskId)
+            );
+        }
+    );
+
+    if (!task) {
+        return;
+    }
+
+    const confirmDelete =
+        confirm(
+            `Excluir definitivamente?\n\n${task.text}`
+        );
+
+    if (!confirmDelete) {
+        return;
+    }
+
+    const { error } =
+        await supabaseClient
+            .from("tasks")
+            .delete()
+            .eq("id", task.id);
+
+    if (error) {
+        console.error(
+            "Erro ao excluir tarefa:",
+            error
+        );
+
+        alert(
+            `Não foi possível excluir a tarefa: ${error.message}`
+        );
+
+        return;
+    }
+
+    tasks = tasks.filter(
+        function (currentTask) {
+            return (
+                String(
+                    currentTask.id
+                ) !==
+                String(task.id)
+            );
+        }
+    );
+
+    renderAll();
+}
+
+// ========================================
+// ARRASTAR E SOLTAR
+// ========================================
+
+dropZones.forEach(
+    function (dropZone) {
+        dropZone.addEventListener(
+            "dragover",
+            function (event) {
+                event.preventDefault();
+
+                event.dataTransfer.dropEffect =
+                    "move";
+
+                dropZone.classList.add(
+                    "drag-over"
+                );
+            }
+        );
+
+        dropZone.addEventListener(
+            "dragleave",
+            function (event) {
+                if (
+                    !dropZone.contains(
+                        event.relatedTarget
+                    )
+                ) {
+                    dropZone.classList.remove(
+                        "drag-over"
+                    );
+                }
+            }
+        );
+
+        dropZone.addEventListener(
+            "drop",
+            async function (event) {
+                event.preventDefault();
+
+                dropZone.classList.remove(
+                    "drag-over"
+                );
+
+                const taskId =
+                    event.dataTransfer
+                        .getData(
+                            "text/plain"
+                        ) ||
+                    draggedTaskId;
+
+                const newCategory =
+                    dropZone.dataset
+                        .category;
+
+                await moveTaskToCategory(
+                    taskId,
+                    newCategory
+                );
+            }
+        );
+    }
+);
+
+// ========================================
+// SINCRONIZAÇÃO EM TEMPO REAL
+// ========================================
+
+function startRealtime() {
+    if (tasksRealtimeChannel) {
+        return;
+    }
+
+    tasksRealtimeChannel =
+        supabaseClient
+            .channel(
+                "organizer-tasks-changes"
+            )
+            .on(
+                "postgres_changes",
+                {
+                    event: "*",
+                    schema: "public",
+                    table: "tasks"
+                },
+                async function () {
+                    await loadTasks();
+                }
+            )
+            .subscribe();
+}
+
+async function stopRealtime() {
+    if (!tasksRealtimeChannel) {
+        return;
+    }
+
+    await supabaseClient.removeChannel(
+        tasksRealtimeChannel
+    );
+
+    tasksRealtimeChannel = null;
+}
+
+// ========================================
+// LOGIN
+// ========================================
+
+async function login() {
+    const email =
+        loginEmail.value.trim();
+
+    const password =
+        loginPassword.value;
+
+    if (
+        email === "" ||
+        password === ""
+    ) {
+        loginMessage.textContent =
+            "Preencha o e-mail e a senha.";
+
+        return;
+    }
+
+    loginMessage.textContent =
+        "Entrando...";
+
+    const { error } =
+        await supabaseClient.auth
+            .signInWithPassword({
+                email: email,
+                password: password
+            });
+
+    if (error) {
+        console.error(
+            "Erro no login:",
             error
         );
 
         loginMessage.textContent =
-            translateLoginError(error);
+            "E-mail ou senha incorretos.";
 
-        loginMessage.className =
-            "login-message error";
-
-    } finally {
-        setLoginLoading(false);
+        return;
     }
+
+    loginMessage.textContent = "";
+
+    loginPassword.value = "";
+
+    showApp();
+
+    showPendingView();
+
+    await loadTasks();
+
+    startRealtime();
 }
 
+// ========================================
+// SAIR DO SISTEMA
+// ========================================
 
-async function handleLogout() {
-    try {
-        const { error } =
-            await supabaseClient.auth.signOut({
+async function logout() {
+    await stopRealtime();
+
+    const { error } =
+        await supabaseClient.auth
+            .signOut({
                 scope: "local"
             });
 
-        if (error) {
-            throw error;
-        }
-
-        showLoginScreen();
-
-    } catch (error) {
+    if (error) {
         console.error(
             "Erro ao sair:",
             error
         );
 
         alert(
-            "Não foi possível sair do sistema."
+            "Não foi possível encerrar a sessão."
         );
+
+        return;
     }
+
+    tasks = [];
+
+    importantList.innerHTML = "";
+    requiredList.innerHTML = "";
+    wheneverList.innerHTML = "";
+    historyList.innerHTML = "";
+
+    loginEmail.value = "";
+    loginPassword.value = "";
+    loginMessage.textContent = "";
+
+    showLogin();
+
+    loginEmail.focus();
 }
 
+// ========================================
+// VERIFICAR SESSÃO AO ABRIR
+// ========================================
 
-async function checkAuthentication() {
-    try {
-        const {
-            data: { session },
-            error
-        } =
-            await supabaseClient.auth.getSession();
+async function checkSession() {
+    const { data, error } =
+        await supabaseClient.auth
+            .getSession();
 
-        if (error) {
-            throw error;
-        }
-
-        if (!session) {
-            showLoginScreen();
-            return;
-        }
-
-        showPrivateSystem(session.user);
-        renderAccounts();
-
-    } catch (error) {
+    if (error) {
         console.error(
-            "Erro ao verificar a sessão:",
+            "Erro ao verificar sessão:",
             error
         );
 
-        showLoginScreen();
-
-        loginMessage.textContent =
-            "Não foi possível verificar o acesso.";
-
-        loginMessage.className =
-            "login-message error";
-    }
-}
-
-
-// ========================================
-// CADASTRO DE CONTAS
-// ========================================
-
-function createAccount(event) {
-    event.preventDefault();
-
-    const company =
-        accountCompanyInput.value;
-
-    const supplier =
-        accountSupplierInput.value.trim();
-
-    const description =
-        accountDescriptionInput.value.trim();
-
-    const dueDate =
-        accountDueDateInput.value;
-
-    if (
-        !company ||
-        !supplier ||
-        !description ||
-        !dueDate
-    ) {
-        alert(
-            "Preencha todos os campos da conta."
-        );
+        showLogin();
 
         return;
     }
 
-    const newAccount = {
-        id: Date.now(),
-        company,
-        supplier,
-        description,
-        dueDate,
-        status: "pending",
-        createdAt: new Date().toISOString(),
-        deliveredAt: null
-    };
+    if (data.session) {
+        showApp();
 
-    accounts.push(newAccount);
+        showPendingView();
 
-    saveAccounts();
-    renderAccounts();
-    closeAccountModal();
-}
+        await loadTasks();
 
-
-// ========================================
-// ALTERAÇÃO DE STATUS
-// ========================================
-
-function toggleAccountStatus(accountId) {
-    const account =
-        accounts.find(
-            currentAccount =>
-                currentAccount.id === accountId
-        );
-
-    if (!account) {
-        return;
-    }
-
-    if (account.status === "delivered") {
-        account.status = "pending";
-        account.deliveredAt = null;
+        startRealtime();
     } else {
-        account.status = "delivered";
-        account.deliveredAt =
-            new Date().toISOString();
+        showLogin();
     }
-
-    saveAccounts();
-    renderAccounts();
 }
 
-
 // ========================================
-// MENU LATERAL
-// ========================================
-
-function changeView(clickedButton) {
-    menuButtons.forEach(button => {
-        button.classList.remove("active");
-    });
-
-    clickedButton.classList.add("active");
-
-    currentView =
-        clickedButton.dataset.view;
-
-    renderAccounts();
-
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
-}
-
-
-// ========================================
-// EVENTOS DE LOGIN
+// EVENTOS
 // ========================================
 
-loginForm.addEventListener(
-    "submit",
-    handleLogin
-);
-
-logoutButton.addEventListener(
+addTaskButton.addEventListener(
     "click",
-    handleLogout
+    addTask
 );
 
-
-// ========================================
-// EVENTOS DO MODAL
-// ========================================
-
-openAccountFormButton.addEventListener(
-    "click",
-    openAccountModal
-);
-
-closeAccountFormButton.addEventListener(
-    "click",
-    closeAccountModal
-);
-
-cancelAccountFormButton.addEventListener(
-    "click",
-    closeAccountModal
-);
-
-accountForm.addEventListener(
-    "submit",
-    createAccount
-);
-
-accountModal.addEventListener(
-    "click",
-    event => {
-        if (event.target === accountModal) {
-            closeAccountModal();
+taskInput.addEventListener(
+    "keydown",
+    function (event) {
+        if (event.key === "Enter") {
+            addTask();
         }
     }
+);
+
+editTaskForm.addEventListener(
+    "submit",
+    saveTaskEdits
+);
+
+closeEditModalButton.addEventListener(
+    "click",
+    closeEditTaskModal
+);
+
+cancelEditButton.addEventListener(
+    "click",
+    closeEditTaskModal
+);
+
+editModalBackdrop.addEventListener(
+    "click",
+    closeEditTaskModal
+);
+
+editTaskNotes.addEventListener(
+    "input",
+    updateEditNotesCount
 );
 
 document.addEventListener(
     "keydown",
-    event => {
+    function (event) {
         if (
             event.key === "Escape" &&
-            accountModal.classList.contains("open")
+            !editTaskModal.hidden
         ) {
-            closeAccountModal();
+            closeEditTaskModal();
         }
     }
 );
 
-
-// ========================================
-// EVENTOS DAS CONTAS
-// ========================================
-
-document.addEventListener(
+loginButton.addEventListener(
     "click",
-    event => {
-        const actionButton =
-            event.target.closest(
-                '[data-action="toggle-status"]'
-            );
+    login
+);
 
-        if (!actionButton) {
-            return;
+loginPassword.addEventListener(
+    "keydown",
+    function (event) {
+        if (event.key === "Enter") {
+            login();
         }
-
-        const accountId =
-            Number(
-                actionButton.dataset.accountId
-            );
-
-        toggleAccountStatus(accountId);
     }
 );
 
+logoutButton.addEventListener(
+    "click",
+    logout
+);
 
-// ========================================
-// EVENTOS DO MENU
-// ========================================
+pendingTabButton.addEventListener(
+    "click",
+    showPendingView
+);
 
-menuButtons.forEach(button => {
-    button.addEventListener(
-        "click",
-        () => changeView(button)
-    );
-});
+historyTabButton.addEventListener(
+    "click",
+    showHistoryView
+);
 
+historySearch.addEventListener(
+    "input",
+    renderHistory
+);
 
-// ========================================
-// INICIALIZAÇÃO
-// ========================================
+historyPeriod.addEventListener(
+    "change",
+    renderHistory
+);
 
-if (checkRequiredElements()) {
-    checkAuthentication();
-}
+// Verifica a sessão ao abrir a página
+checkSession();
