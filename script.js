@@ -17,9 +17,9 @@ const supabaseClient = window.supabase.createClient(
     }
 );
 
-// ================================
-// ELEMENTOS DA TELA DE LOGIN
-// ================================
+// ========================================
+// ELEMENTOS DO LOGIN
+// ========================================
 
 const loginSection =
     document.getElementById("loginSection");
@@ -42,9 +42,25 @@ const loginMessage =
 const logoutButton =
     document.getElementById("logoutButton");
 
-// ================================
-// ELEMENTOS DO QUADRO
-// ================================
+// ========================================
+// ELEMENTOS DAS ABAS
+// ========================================
+
+const pendingTabButton =
+    document.getElementById("pendingTabButton");
+
+const historyTabButton =
+    document.getElementById("historyTabButton");
+
+const pendingView =
+    document.getElementById("pendingView");
+
+const historyView =
+    document.getElementById("historyView");
+
+// ========================================
+// ELEMENTOS DAS TAREFAS PENDENTES
+// ========================================
 
 const taskInput =
     document.getElementById("taskInput");
@@ -76,25 +92,55 @@ const wheneverCount =
 const dropZones =
     document.querySelectorAll(".task-drop-zone");
 
-// Tarefas carregadas do Supabase
+// ========================================
+// ELEMENTOS DO HISTÓRICO
+// ========================================
+
+const historySearch =
+    document.getElementById("historySearch");
+
+const historyPeriod =
+    document.getElementById("historyPeriod");
+
+const historyList =
+    document.getElementById("historyList");
+
+const completedTodayCount =
+    document.getElementById("completedTodayCount");
+
+const completedWeekCount =
+    document.getElementById("completedWeekCount");
+
+const completedTotalCount =
+    document.getElementById("completedTotalCount");
+
+// ========================================
+// VARIÁVEIS DO SISTEMA
+// ========================================
+
 let tasks = [];
 
-// Tarefa que está sendo arrastada
 let draggedTaskId = null;
 
-// Canal usado para atualização em tempo real
 let tasksRealtimeChannel = null;
 
-// Relaciona cada categoria com sua coluna
+// Liga cada categoria à sua coluna
 const categoryLists = {
     important: importantList,
     required: requiredList,
     whenever: wheneverList
 };
 
-// ================================
-// MOSTRAR E ESCONDER TELAS
-// ================================
+// Nomes exibidos no histórico
+const categoryLabels = {
+    important: "Mais importante",
+    required: "Precisa ser feito",
+    whenever: "Fazer quando tiver tempo"
+};
+
+// ========================================
+// CONTROLE DAS TELAS
+// ========================================
 
 function showLogin() {
     loginSection.hidden = false;
@@ -106,9 +152,45 @@ function showApp() {
     appSection.hidden = false;
 }
 
-// ================================
-// CRIAR CARTÃO DA TAREFA
-// ================================
+function showPendingView() {
+    pendingView.hidden = false;
+    historyView.hidden = true;
+
+    pendingTabButton.classList.add("active");
+    historyTabButton.classList.remove("active");
+}
+
+function showHistoryView() {
+    pendingView.hidden = true;
+    historyView.hidden = false;
+
+    pendingTabButton.classList.remove("active");
+    historyTabButton.classList.add("active");
+
+    renderHistory();
+}
+
+// ========================================
+// MENSAGEM DE COLUNA VAZIA
+// ========================================
+
+function createEmptyColumnMessage() {
+    const message =
+        document.createElement("p");
+
+    message.classList.add(
+        "empty-column-message"
+    );
+
+    message.textContent =
+        "Nenhuma tarefa nesta prioridade.";
+
+    return message;
+}
+
+// ========================================
+// CRIAR CARTÃO DE TAREFA PENDENTE
+// ========================================
 
 function createTaskCard(task) {
     const taskCard =
@@ -116,7 +198,6 @@ function createTaskCard(task) {
 
     taskCard.classList.add("task-card");
 
-    // Permite que o cartão seja arrastado
     taskCard.draggable = true;
 
     taskCard.dataset.taskId =
@@ -133,12 +214,15 @@ function createTaskCard(task) {
         document.createElement("span");
 
     taskText.classList.add("task-text");
-    taskText.textContent = task.text;
+
+    taskText.textContent =
+        task.text;
 
     const taskMeta =
         document.createElement("span");
 
     taskMeta.classList.add("task-meta");
+
     taskMeta.textContent =
         "Arraste para mudar a prioridade";
 
@@ -152,12 +236,37 @@ function createTaskCard(task) {
         "task-actions"
     );
 
+    // Botão para concluir
+    const completeButton =
+        document.createElement("button");
+
+    completeButton.type = "button";
+    completeButton.textContent = "✓";
+    completeButton.title =
+        "Marcar como concluída";
+
+    completeButton.classList.add(
+        "task-action-button",
+        "complete-task-button"
+    );
+
+    completeButton.addEventListener(
+        "click",
+        function (event) {
+            event.stopPropagation();
+
+            completeTask(task.id);
+        }
+    );
+
+    // Botão para excluir
     const deleteButton =
         document.createElement("button");
 
     deleteButton.type = "button";
     deleteButton.textContent = "🗑";
-    deleteButton.title = "Excluir tarefa";
+    deleteButton.title =
+        "Excluir tarefa";
 
     deleteButton.classList.add(
         "task-action-button",
@@ -173,12 +282,23 @@ function createTaskCard(task) {
         }
     );
 
-    taskActions.appendChild(deleteButton);
+    taskActions.appendChild(
+        completeButton
+    );
 
-    taskCard.appendChild(taskContent);
-    taskCard.appendChild(taskActions);
+    taskActions.appendChild(
+        deleteButton
+    );
 
-    // Quando começa a arrastar
+    taskCard.appendChild(
+        taskContent
+    );
+
+    taskCard.appendChild(
+        taskActions
+    );
+
+    // Início do arrastar
     taskCard.addEventListener(
         "dragstart",
         function (event) {
@@ -199,7 +319,7 @@ function createTaskCard(task) {
         }
     );
 
-    // Quando termina de arrastar
+    // Final do arrastar
     taskCard.addEventListener(
         "dragend",
         function () {
@@ -222,29 +342,11 @@ function createTaskCard(task) {
     return taskCard;
 }
 
-// ================================
-// MENSAGEM DE COLUNA VAZIA
-// ================================
+// ========================================
+// MOSTRAR TAREFAS PENDENTES
+// ========================================
 
-function createEmptyMessage() {
-    const message =
-        document.createElement("p");
-
-    message.classList.add(
-        "empty-column-message"
-    );
-
-    message.textContent =
-        "Nenhuma tarefa nesta prioridade.";
-
-    return message;
-}
-
-// ================================
-// MOSTRAR AS TAREFAS
-// ================================
-
-function renderTasks() {
+function renderPendingTasks() {
     importantList.innerHTML = "";
     requiredList.innerHTML = "";
     wheneverList.innerHTML = "";
@@ -255,26 +357,34 @@ function renderTasks() {
         whenever: 0
     };
 
-    tasks.forEach(function (task) {
-        const category =
-            task.category || "required";
-
-        const categoryList =
-            categoryLists[category];
-
-        if (!categoryList) {
-            return;
+    const pendingTasks = tasks.filter(
+        function (task) {
+            return !task.completed;
         }
+    );
 
-        const taskCard =
-            createTaskCard(task);
+    pendingTasks.forEach(
+        function (task) {
+            const category =
+                task.category || "required";
 
-        categoryList.appendChild(
-            taskCard
-        );
+            const categoryList =
+                categoryLists[category];
 
-        categoryCounts[category]++;
-    });
+            if (!categoryList) {
+                return;
+            }
+
+            const taskCard =
+                createTaskCard(task);
+
+            categoryList.appendChild(
+                taskCard
+            );
+
+            categoryCounts[category]++;
+        }
+    );
 
     importantCount.textContent =
         categoryCounts.important;
@@ -290,27 +400,414 @@ function renderTasks() {
             const list =
                 categoryLists[category];
 
-            if (list.children.length === 0) {
+            if (
+                list.children.length === 0
+            ) {
                 list.appendChild(
-                    createEmptyMessage()
+                    createEmptyColumnMessage()
                 );
             }
         }
     );
 }
 
-// ================================
+// ========================================
+// FORMATAR DATA DO HISTÓRICO
+// ========================================
+
+function formatCompletedDate(dateValue) {
+    if (!dateValue) {
+        return "Data não registrada";
+    }
+
+    const date =
+        new Date(dateValue);
+
+    if (
+        Number.isNaN(date.getTime())
+    ) {
+        return "Data inválida";
+    }
+
+    return date.toLocaleString(
+        "pt-BR",
+        {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        }
+    );
+}
+
+// ========================================
+// DATAS UTILIZADAS NOS FILTROS
+// ========================================
+
+function getStartOfToday() {
+    const date = new Date();
+
+    date.setHours(0, 0, 0, 0);
+
+    return date;
+}
+
+function getStartOfTomorrow() {
+    const date =
+        getStartOfToday();
+
+    date.setDate(
+        date.getDate() + 1
+    );
+
+    return date;
+}
+
+function getStartOfWeek() {
+    const date =
+        getStartOfToday();
+
+    const currentDay =
+        date.getDay();
+
+    const difference =
+        currentDay === 0
+            ? -6
+            : 1 - currentDay;
+
+    date.setDate(
+        date.getDate() + difference
+    );
+
+    return date;
+}
+
+function getStartOfMonth() {
+    const today = new Date();
+
+    return new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        1
+    );
+}
+
+// ========================================
+// FILTRAR TAREFAS DO HISTÓRICO
+// ========================================
+
+function getFilteredHistoryTasks() {
+    const searchText =
+        historySearch.value
+            .trim()
+            .toLowerCase();
+
+    const selectedPeriod =
+        historyPeriod.value;
+
+    let startDate = null;
+
+    if (selectedPeriod === "today") {
+        startDate =
+            getStartOfToday();
+    }
+
+    if (selectedPeriod === "week") {
+        startDate =
+            getStartOfWeek();
+    }
+
+    if (selectedPeriod === "month") {
+        startDate =
+            getStartOfMonth();
+    }
+
+    return tasks
+        .filter(function (task) {
+            return task.completed;
+        })
+        .filter(function (task) {
+            return task.text
+                .toLowerCase()
+                .includes(searchText);
+        })
+        .filter(function (task) {
+            if (!startDate) {
+                return true;
+            }
+
+            if (!task.completedAt) {
+                return false;
+            }
+
+            const completedDate =
+                new Date(
+                    task.completedAt
+                );
+
+            return (
+                completedDate >=
+                startDate
+            );
+        })
+        .sort(function (
+            firstTask,
+            secondTask
+        ) {
+            const firstDate =
+                firstTask.completedAt
+                    ? new Date(
+                        firstTask.completedAt
+                    ).getTime()
+                    : 0;
+
+            const secondDate =
+                secondTask.completedAt
+                    ? new Date(
+                        secondTask.completedAt
+                    ).getTime()
+                    : 0;
+
+            return (
+                secondDate -
+                firstDate
+            );
+        });
+}
+
+// ========================================
+// CRIAR LINHA DO HISTÓRICO
+// ========================================
+
+function createHistoryRow(task) {
+    const historyRow =
+        document.createElement("div");
+
+    historyRow.classList.add(
+        "history-row"
+    );
+
+    const taskColumn =
+        document.createElement("div");
+
+    taskColumn.classList.add(
+        "history-task"
+    );
+
+    const checkIcon =
+        document.createElement("span");
+
+    checkIcon.classList.add(
+        "history-check-icon"
+    );
+
+    checkIcon.textContent = "✓";
+
+    const taskText =
+        document.createElement("span");
+
+    taskText.classList.add(
+        "history-task-text"
+    );
+
+    taskText.textContent =
+        task.text;
+
+    taskColumn.appendChild(
+        checkIcon
+    );
+
+    taskColumn.appendChild(
+        taskText
+    );
+
+    const priorityBadge =
+        document.createElement("span");
+
+    const category =
+        task.category || "required";
+
+    priorityBadge.classList.add(
+        "priority-badge",
+        category
+    );
+
+    priorityBadge.textContent =
+        categoryLabels[category] ||
+        "Sem prioridade";
+
+    const completedDate =
+        document.createElement("span");
+
+    completedDate.classList.add(
+        "history-date"
+    );
+
+    completedDate.textContent =
+        formatCompletedDate(
+            task.completedAt
+        );
+
+    historyRow.appendChild(
+        taskColumn
+    );
+
+    historyRow.appendChild(
+        priorityBadge
+    );
+
+    historyRow.appendChild(
+        completedDate
+    );
+
+    return historyRow;
+}
+
+// ========================================
+// MOSTRAR HISTÓRICO
+// ========================================
+
+function renderHistory() {
+    historyList.innerHTML = "";
+
+    const filteredTasks =
+        getFilteredHistoryTasks();
+
+    if (
+        filteredTasks.length === 0
+    ) {
+        const emptyMessage =
+            document.createElement("p");
+
+        emptyMessage.classList.add(
+            "empty-history-message"
+        );
+
+        emptyMessage.textContent =
+            "Nenhuma tarefa encontrada no histórico.";
+
+        historyList.appendChild(
+            emptyMessage
+        );
+
+        updateHistorySummary();
+
+        return;
+    }
+
+    filteredTasks.forEach(
+        function (task) {
+            const historyRow =
+                createHistoryRow(task);
+
+            historyList.appendChild(
+                historyRow
+            );
+        }
+    );
+
+    updateHistorySummary();
+}
+
+// ========================================
+// CONTADORES DO HISTÓRICO
+// ========================================
+
+function updateHistorySummary() {
+    const completedTasks =
+        tasks.filter(
+            function (task) {
+                return task.completed;
+            }
+        );
+
+    const todayStart =
+        getStartOfToday();
+
+    const tomorrowStart =
+        getStartOfTomorrow();
+
+    const weekStart =
+        getStartOfWeek();
+
+    const todayTasks =
+        completedTasks.filter(
+            function (task) {
+                if (!task.completedAt) {
+                    return false;
+                }
+
+                const completedDate =
+                    new Date(
+                        task.completedAt
+                    );
+
+                return (
+                    completedDate >=
+                        todayStart &&
+                    completedDate <
+                        tomorrowStart
+                );
+            }
+        );
+
+    const weekTasks =
+        completedTasks.filter(
+            function (task) {
+                if (!task.completedAt) {
+                    return false;
+                }
+
+                const completedDate =
+                    new Date(
+                        task.completedAt
+                    );
+
+                return (
+                    completedDate >=
+                    weekStart
+                );
+            }
+        );
+
+    completedTodayCount.textContent =
+        todayTasks.length;
+
+    completedWeekCount.textContent =
+        weekTasks.length;
+
+    completedTotalCount.textContent =
+        completedTasks.length;
+}
+
+// ========================================
+// ATUALIZAR TODAS AS TELAS
+// ========================================
+
+function renderAll() {
+    renderPendingTasks();
+    renderHistory();
+}
+
+// ========================================
 // BUSCAR TAREFAS NO SUPABASE
-// ================================
+// ========================================
 
 async function loadTasks() {
     const { data, error } =
         await supabaseClient
             .from("tasks")
             .select(
-                "id, text, category, completed, created_at"
+                `
+                id,
+                text,
+                category,
+                completed,
+                created_at,
+                completed_at
+                `
             )
-            .eq("completed", false)
             .order("created_at", {
                 ascending: true
             });
@@ -322,29 +819,38 @@ async function loadTasks() {
         );
 
         alert(
-            "Não foi possível carregar as tarefas."
+            `Não foi possível carregar as tarefas: ${error.message}`
         );
 
         return;
     }
 
-    tasks = data.map(function (task) {
-        return {
-            id: task.id,
-            text: task.text,
-            category:
-                task.category || "required",
-            completed: task.completed,
-            createdAt: task.created_at
-        };
-    });
+    tasks = data.map(
+        function (task) {
+            return {
+                id: task.id,
+                text: task.text,
+                category:
+                    task.category ||
+                    "required",
+                completed:
+                    Boolean(
+                        task.completed
+                    ),
+                createdAt:
+                    task.created_at,
+                completedAt:
+                    task.completed_at
+            };
+        }
+    );
 
-    renderTasks();
+    renderAll();
 }
 
-// ================================
-// ADICIONAR TAREFA
-// ================================
+// ========================================
+// ADICIONAR NOVA TAREFA
+// ========================================
 
 async function addTask() {
     const taskText =
@@ -359,10 +865,12 @@ async function addTask() {
         );
 
         taskInput.focus();
+
         return;
     }
 
     addTaskButton.disabled = true;
+
     addTaskButton.textContent =
         "Adicionando...";
 
@@ -371,11 +879,14 @@ async function addTask() {
             .from("tasks")
             .insert({
                 text: taskText,
-                category: selectedCategory,
-                completed: false
+                category:
+                    selectedCategory,
+                completed: false,
+                completed_at: null
             });
 
     addTaskButton.disabled = false;
+
     addTaskButton.textContent =
         "Adicionar tarefa";
 
@@ -386,31 +897,33 @@ async function addTask() {
         );
 
         alert(
-            "Não foi possível adicionar a tarefa."
+            `Não foi possível adicionar a tarefa: ${error.message}`
         );
 
         return;
     }
 
     taskInput.value = "";
-    taskCategory.value = "required";
+
+    taskCategory.value =
+        "required";
+
     taskInput.focus();
 
     await loadTasks();
 }
 
-// ================================
-// MOVER TAREFA DE PRIORIDADE
-// ================================
+// ========================================
+// CONCLUIR TAREFA
+// ========================================
 
-async function moveTaskToCategory(
-    taskId,
-    newCategory
-) {
+async function completeTask(taskId) {
     const task = tasks.find(
         function (currentTask) {
             return (
-                String(currentTask.id) ===
+                String(
+                    currentTask.id
+                ) ===
                 String(taskId)
             );
         }
@@ -420,22 +933,106 @@ async function moveTaskToCategory(
         return;
     }
 
-    if (task.category === newCategory) {
+    const confirmComplete =
+        confirm(
+            `Marcar como concluída?\n\n${task.text}`
+        );
+
+    if (!confirmComplete) {
+        return;
+    }
+
+    const completedAt =
+        new Date().toISOString();
+
+    const { error } =
+        await supabaseClient
+            .from("tasks")
+            .update({
+                completed: true,
+                completed_at:
+                    completedAt
+            })
+            .eq("id", task.id);
+
+    if (error) {
+        console.error(
+            "Erro ao concluir tarefa:",
+            error
+        );
+
+        alert(
+            `Não foi possível concluir a tarefa: ${error.message}`
+        );
+
+        return;
+    }
+
+    await loadTasks();
+}
+
+// ========================================
+// MOVER TAREFA DE PRIORIDADE
+// ========================================
+
+async function moveTaskToCategory(
+    taskId,
+    newCategory
+) {
+    const validCategories = [
+        "important",
+        "required",
+        "whenever"
+    ];
+
+    if (
+        !validCategories.includes(
+            newCategory
+        )
+    ) {
+        return;
+    }
+
+    const task = tasks.find(
+        function (currentTask) {
+            return (
+                String(
+                    currentTask.id
+                ) ===
+                String(taskId)
+            );
+        }
+    );
+
+    if (
+        !task ||
+        task.completed
+    ) {
+        return;
+    }
+
+    if (
+        task.category ===
+        newCategory
+    ) {
         return;
     }
 
     const previousCategory =
         task.category;
 
-    // Move imediatamente na tela
-    task.category = newCategory;
-    renderTasks();
+    // Atualiza primeiro na tela
+    task.category =
+        newCategory;
+
+    renderPendingTasks();
 
     const { error } =
         await supabaseClient
             .from("tasks")
             .update({
-                category: newCategory
+                category:
+                    newCategory
             })
             .eq("id", task.id);
 
@@ -445,26 +1042,41 @@ async function moveTaskToCategory(
             error
         );
 
-        // Volta para a categoria anterior
         task.category =
             previousCategory;
 
-        renderTasks();
+        renderPendingTasks();
 
         alert(
-            "Não foi possível mudar a prioridade."
+            `Não foi possível mudar a prioridade: ${error.message}`
         );
     }
 }
 
-// ================================
-// EXCLUIR UMA TAREFA
-// ================================
+// ========================================
+// EXCLUIR TAREFA
+// ========================================
 
 async function deleteTask(taskId) {
-    const confirmDelete = confirm(
-        "Deseja realmente excluir esta tarefa?"
+    const task = tasks.find(
+        function (currentTask) {
+            return (
+                String(
+                    currentTask.id
+                ) ===
+                String(taskId)
+            );
+        }
     );
+
+    if (!task) {
+        return;
+    }
+
+    const confirmDelete =
+        confirm(
+            `Excluir definitivamente?\n\n${task.text}`
+        );
 
     if (!confirmDelete) {
         return;
@@ -474,7 +1086,7 @@ async function deleteTask(taskId) {
         await supabaseClient
             .from("tasks")
             .delete()
-            .eq("id", taskId);
+            .eq("id", task.id);
 
     if (error) {
         console.error(
@@ -483,87 +1095,93 @@ async function deleteTask(taskId) {
         );
 
         alert(
-            "Não foi possível excluir a tarefa."
+            `Não foi possível excluir a tarefa: ${error.message}`
         );
 
         return;
     }
 
     tasks = tasks.filter(
-        function (task) {
+        function (currentTask) {
             return (
-                String(task.id) !==
-                String(taskId)
+                String(
+                    currentTask.id
+                ) !==
+                String(task.id)
             );
         }
     );
 
-    renderTasks();
+    renderAll();
 }
 
-// ================================
+// ========================================
 // ARRASTAR E SOLTAR
-// ================================
+// ========================================
 
-dropZones.forEach(function (dropZone) {
-    dropZone.addEventListener(
-        "dragover",
-        function (event) {
-            // Necessário para permitir o drop
-            event.preventDefault();
+dropZones.forEach(
+    function (dropZone) {
+        dropZone.addEventListener(
+            "dragover",
+            function (event) {
+                event.preventDefault();
 
-            event.dataTransfer.dropEffect =
-                "move";
+                event.dataTransfer.dropEffect =
+                    "move";
 
-            dropZone.classList.add(
-                "drag-over"
-            );
-        }
-    );
-
-    dropZone.addEventListener(
-        "dragleave",
-        function (event) {
-            if (
-                !dropZone.contains(
-                    event.relatedTarget
-                )
-            ) {
-                dropZone.classList.remove(
+                dropZone.classList.add(
                     "drag-over"
                 );
             }
-        }
-    );
+        );
 
-    dropZone.addEventListener(
-        "drop",
-        async function (event) {
-            event.preventDefault();
+        dropZone.addEventListener(
+            "dragleave",
+            function (event) {
+                if (
+                    !dropZone.contains(
+                        event.relatedTarget
+                    )
+                ) {
+                    dropZone.classList.remove(
+                        "drag-over"
+                    );
+                }
+            }
+        );
 
-            dropZone.classList.remove(
-                "drag-over"
-            );
+        dropZone.addEventListener(
+            "drop",
+            async function (event) {
+                event.preventDefault();
 
-            const taskId =
-                event.dataTransfer.getData(
-                    "text/plain"
-                ) || draggedTaskId;
+                dropZone.classList.remove(
+                    "drag-over"
+                );
 
-            const newCategory =
-                dropZone.dataset.category;
+                const taskId =
+                    event.dataTransfer
+                        .getData(
+                            "text/plain"
+                        ) ||
+                    draggedTaskId;
 
-            await moveTaskToCategory(
-                taskId,
-                newCategory
-            );
-        }
-    );
-});
+                const newCategory =
+                    dropZone.dataset
+                        .category;
 
-// ================================
-// REALTIME
-// ================================
+                await moveTaskToCategory(
+                    taskId,
+                    newCategory
+                );
+            }
+        );
+    }
+);
+
+// ========================================
+// SINCRONIZAÇÃO EM TEMPO REAL
+// ========================================
 
 function startRealtime() {
     if (tasksRealtimeChannel) {
@@ -572,7 +1190,9 @@ function startRealtime() {
 
     tasksRealtimeChannel =
         supabaseClient
-            .channel("tasks-priority-board")
+            .channel(
+                "organizer-tasks-changes"
+            )
             .on(
                 "postgres_changes",
                 {
@@ -580,8 +1200,8 @@ function startRealtime() {
                     schema: "public",
                     table: "tasks"
                 },
-                function () {
-                    loadTasks();
+                async function () {
+                    await loadTasks();
                 }
             )
             .subscribe();
@@ -599,13 +1219,9 @@ async function stopRealtime() {
     tasksRealtimeChannel = null;
 }
 
-// O canal Realtime escuta INSERT, UPDATE e DELETE na
-// tabela. Assim, alterações feitas em outro computador
-// chamam loadTasks() automaticamente. :contentReference[oaicite:0]{index=0}
-
-// ================================
+// ========================================
 // LOGIN
-// ================================
+// ========================================
 
 async function login() {
     const email =
@@ -647,25 +1263,30 @@ async function login() {
     }
 
     loginMessage.textContent = "";
+
     loginPassword.value = "";
 
     showApp();
 
+    showPendingView();
+
     await loadTasks();
+
     startRealtime();
 }
 
-// ================================
-// LOGOUT
-// ================================
+// ========================================
+// SAIR DO SISTEMA
+// ========================================
 
 async function logout() {
     await stopRealtime();
 
     const { error } =
-        await supabaseClient.auth.signOut({
-            scope: "local"
-        });
+        await supabaseClient.auth
+            .signOut({
+                scope: "local"
+            });
 
     if (error) {
         console.error(
@@ -685,18 +1306,20 @@ async function logout() {
     importantList.innerHTML = "";
     requiredList.innerHTML = "";
     wheneverList.innerHTML = "";
+    historyList.innerHTML = "";
 
     loginEmail.value = "";
     loginPassword.value = "";
     loginMessage.textContent = "";
 
     showLogin();
+
     loginEmail.focus();
 }
 
-// ================================
-// VERIFICAR SESSÃO
-// ================================
+// ========================================
+// VERIFICAR SESSÃO AO ABRIR
+// ========================================
 
 async function checkSession() {
     const { data, error } =
@@ -710,22 +1333,26 @@ async function checkSession() {
         );
 
         showLogin();
+
         return;
     }
 
     if (data.session) {
         showApp();
 
+        showPendingView();
+
         await loadTasks();
+
         startRealtime();
     } else {
         showLogin();
     }
 }
 
-// ================================
-// EVENTOS DOS BOTÕES E TECLADO
-// ================================
+// ========================================
+// EVENTOS
+// ========================================
 
 addTaskButton.addEventListener(
     "click",
@@ -760,5 +1387,25 @@ logoutButton.addEventListener(
     logout
 );
 
-// Verifica a sessão quando a página abre
+pendingTabButton.addEventListener(
+    "click",
+    showPendingView
+);
+
+historyTabButton.addEventListener(
+    "click",
+    showHistoryView
+);
+
+historySearch.addEventListener(
+    "input",
+    renderHistory
+);
+
+historyPeriod.addEventListener(
+    "change",
+    renderHistory
+);
+
+// Verifica a sessão ao abrir a página
 checkSession();

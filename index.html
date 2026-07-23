@@ -54,164 +54,279 @@
         </section>
 
         <!-- Área principal -->
-        <section id="appSection" hidden>
+       <section id="appSection" hidden>
 
-            <header class="app-header">
-                <div class="app-title">
-                    <span class="app-icon">
-                        ✓
-                    </span>
+    <header class="app-header">
+        <div class="app-title">
+            <span class="app-icon">✓</span>
 
+            <div>
+                <h1>Organizadora TI</h1>
+
+                <p>
+                    Organize as tarefas e acompanhe o histórico de resoluções
+                </p>
+            </div>
+        </div>
+
+        <button
+            id="logoutButton"
+            type="button"
+            class="logout-button"
+        >
+            Sair
+        </button>
+    </header>
+
+    <!-- Navegação entre as telas -->
+    <nav class="app-tabs">
+        <button
+            id="pendingTabButton"
+            type="button"
+            class="tab-button active"
+        >
+            Tarefas pendentes
+        </button>
+
+        <button
+            id="historyTabButton"
+            type="button"
+            class="tab-button"
+        >
+            Histórico
+        </button>
+    </nav>
+
+    <!-- Tela das tarefas pendentes -->
+    <section id="pendingView">
+
+        <div class="task-creator">
+            <input
+                type="text"
+                id="taskInput"
+                placeholder="Digite uma nova tarefa"
+                autocomplete="off"
+            >
+
+            <select id="taskCategory">
+                <option value="important">
+                    Mais importante
+                </option>
+
+                <option
+                    value="required"
+                    selected
+                >
+                    Precisa ser feito
+                </option>
+
+                <option value="whenever">
+                    Fazer quando tiver tempo
+                </option>
+            </select>
+
+            <button
+                id="addTaskButton"
+                type="button"
+            >
+                Adicionar tarefa
+            </button>
+        </div>
+
+        <div class="priority-board">
+
+            <!-- Mais importante -->
+            <section
+                class="priority-column important-column"
+                data-category="important"
+            >
+                <header class="column-header">
                     <div>
-                        <h1>Organizadora TI</h1>
+                        <h2>🚩 Mais importante</h2>
 
                         <p>
-                            Organize as tarefas e suas prioridades
+                            Tarefas urgentes ou de impacto imediato
                         </p>
                     </div>
-                </div>
 
-                <button
-                    id="logoutButton"
-                    type="button"
-                    class="logout-button"
-                >
-                    Sair
-                </button>
-            </header>
-
-            <!-- Criar uma nova tarefa -->
-            <div class="task-creator">
-                <input
-                    type="text"
-                    id="taskInput"
-                    placeholder="Digite uma nova tarefa"
-                    autocomplete="off"
-                >
-
-                <select id="taskCategory">
-                    <option value="important">
-                        Mais importante
-                    </option>
-
-                    <option
-                        value="required"
-                        selected
+                    <span
+                        id="importantCount"
+                        class="task-count"
                     >
-                        Precisa ser feito
-                    </option>
+                        0
+                    </span>
+                </header>
 
-                    <option value="whenever">
-                        Fazer quando tiver tempo
-                    </option>
-                </select>
-
-                <button
-                    id="addTaskButton"
-                    type="button"
-                >
-                    Adicionar tarefa
-                </button>
-            </div>
-
-            <!-- Quadro de prioridades -->
-            <div class="priority-board">
-
-                <!-- Mais importante -->
-                <section
-                    class="priority-column important-column"
+                <div
+                    id="importantList"
+                    class="task-drop-zone"
                     data-category="important"
-                >
-                    <header class="column-header">
-                        <div>
-                            <h2>
-                                🚩 Mais importante
-                            </h2>
+                ></div>
+            </section>
 
-                            <p>
-                                Tarefas urgentes ou de impacto imediato
-                            </p>
-                        </div>
+            <!-- Precisa ser feito -->
+            <section
+                class="priority-column required-column"
+                data-category="required"
+            >
+                <header class="column-header">
+                    <div>
+                        <h2>📋 Precisa ser feito</h2>
 
-                        <span
-                            id="importantCount"
-                            class="task-count"
-                        >
-                            0
-                        </span>
-                    </header>
+                        <p>
+                            Tarefas necessárias, mas não urgentes
+                        </p>
+                    </div>
 
-                    <div
-                        id="importantList"
-                        class="task-drop-zone"
-                        data-category="important"
-                    ></div>
-                </section>
+                    <span
+                        id="requiredCount"
+                        class="task-count"
+                    >
+                        0
+                    </span>
+                </header>
 
-                <!-- Precisa ser feito -->
-                <section
-                    class="priority-column required-column"
+                <div
+                    id="requiredList"
+                    class="task-drop-zone"
                     data-category="required"
-                >
-                    <header class="column-header">
-                        <div>
-                            <h2>
-                                📋 Precisa ser feito
-                            </h2>
+                ></div>
+            </section>
 
-                            <p>
-                                Tarefas necessárias, mas não urgentes
-                            </p>
-                        </div>
+            <!-- Fazer quando tiver tempo -->
+            <section
+                class="priority-column whenever-column"
+                data-category="whenever"
+            >
+                <header class="column-header">
+                    <div>
+                        <h2>◷ Fazer quando tiver tempo</h2>
 
-                        <span
-                            id="requiredCount"
-                            class="task-count"
-                        >
-                            0
-                        </span>
-                    </header>
+                        <p>
+                            Melhorias e atividades sem urgência
+                        </p>
+                    </div>
 
-                    <div
-                        id="requiredList"
-                        class="task-drop-zone"
-                        data-category="required"
-                    ></div>
-                </section>
+                    <span
+                        id="wheneverCount"
+                        class="task-count"
+                    >
+                        0
+                    </span>
+                </header>
 
-                <!-- Fazer quando tiver tempo -->
-                <section
-                    class="priority-column whenever-column"
+                <div
+                    id="wheneverList"
+                    class="task-drop-zone"
                     data-category="whenever"
-                >
-                    <header class="column-header">
-                        <div>
-                            <h2>
-                                ◷ Fazer quando tiver tempo
-                            </h2>
+                ></div>
+            </section>
 
-                            <p>
-                                Melhorias e atividades sem urgência
-                            </p>
-                        </div>
+        </div>
+    </section>
 
-                        <span
-                            id="wheneverCount"
-                            class="task-count"
-                        >
-                            0
-                        </span>
-                    </header>
+    <!-- Tela do histórico -->
+    <section id="historyView" hidden>
 
-                    <div
-                        id="wheneverList"
-                        class="task-drop-zone"
-                        data-category="whenever"
-                    ></div>
-                </section>
+        <header class="history-header">
+            <div>
+                <h2>Histórico de tarefas concluídas</h2>
 
+                <p>
+                    Consulte o que foi resolvido e quando
+                </p>
             </div>
-        </section>
+        </header>
+
+        <div class="history-filters">
+            <input
+                type="search"
+                id="historySearch"
+                placeholder="Buscar tarefa no histórico"
+                autocomplete="off"
+            >
+
+            <select id="historyPeriod">
+                <option value="all">
+                    Todo o período
+                </option>
+
+                <option value="today">
+                    Concluídas hoje
+                </option>
+
+                <option value="week">
+                    Esta semana
+                </option>
+
+                <option value="month">
+                    Este mês
+                </option>
+            </select>
+        </div>
+
+        <div class="history-table-wrapper">
+            <div class="history-table-header">
+                <span>Tarefa</span>
+                <span>Prioridade</span>
+                <span>Concluída em</span>
+            </div>
+
+            <div id="historyList">
+                <p class="empty-history-message">
+                    Nenhuma tarefa foi concluída ainda.
+                </p>
+            </div>
+        </div>
+
+        <div class="history-summary">
+
+            <article class="summary-card">
+                <span class="summary-icon">▣</span>
+
+                <div>
+                    <span class="summary-label">
+                        Concluídas hoje
+                    </span>
+
+                    <strong id="completedTodayCount">
+                        0
+                    </strong>
+                </div>
+            </article>
+
+            <article class="summary-card">
+                <span class="summary-icon">↗</span>
+
+                <div>
+                    <span class="summary-label">
+                        Esta semana
+                    </span>
+
+                    <strong id="completedWeekCount">
+                        0
+                    </strong>
+                </div>
+            </article>
+
+            <article class="summary-card">
+                <span class="summary-icon">✓</span>
+
+                <div>
+                    <span class="summary-label">
+                        Total no histórico
+                    </span>
+
+                    <strong id="completedTotalCount">
+                        0
+                    </strong>
+                </div>
+            </article>
+
+        </div>
+    </section>
+
+</section>
 
     </main>
 
