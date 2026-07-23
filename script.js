@@ -18,7 +18,7 @@ const supabaseClient = window.supabase.createClient(
 );
 
 // ========================================
-// ELEMENTOS DO LOGIN
+// ELEMENTOS DA PÁGINA
 // ========================================
 
 const loginSection =
@@ -42,10 +42,6 @@ const loginMessage =
 const logoutButton =
     document.getElementById("logoutButton");
 
-// ========================================
-// ELEMENTOS DAS ABAS
-// ========================================
-
 const pendingTabButton =
     document.getElementById("pendingTabButton");
 
@@ -57,10 +53,6 @@ const pendingView =
 
 const historyView =
     document.getElementById("historyView");
-
-// ========================================
-// ELEMENTOS DAS TAREFAS PENDENTES
-// ========================================
 
 const taskInput =
     document.getElementById("taskInput");
@@ -92,10 +84,6 @@ const wheneverCount =
 const dropZones =
     document.querySelectorAll(".task-drop-zone");
 
-// ========================================
-// ELEMENTOS DO HISTÓRICO
-// ========================================
-
 const historySearch =
     document.getElementById("historySearch");
 
@@ -114,8 +102,8 @@ const completedWeekCount =
 const completedTotalCount =
     document.getElementById("completedTotalCount");
 
-    // ========================================
-// ELEMENTOS DA EDIÇÃO
+// ========================================
+// ELEMENTOS DO MODAL DE EDIÇÃO
 // ========================================
 
 const editTaskModal =
@@ -125,7 +113,9 @@ const editModalBackdrop =
     document.getElementById("editModalBackdrop");
 
 const closeEditModalButton =
-    document.getElementById("closeEditModalButton");
+    document.getElementById(
+        "closeEditModalButton"
+    );
 
 const cancelEditButton =
     document.getElementById("cancelEditButton");
@@ -140,7 +130,9 @@ const editTaskText =
     document.getElementById("editTaskText");
 
 const editTaskCategory =
-    document.getElementById("editTaskCategory");
+    document.getElementById(
+        "editTaskCategory"
+    );
 
 const editTaskNotes =
     document.getElementById("editTaskNotes");
@@ -163,14 +155,12 @@ let tasksRealtimeChannel = null;
 
 const openNotesTaskIds = new Set();
 
-// Liga cada categoria à sua coluna
 const categoryLists = {
     important: importantList,
     required: requiredList,
     whenever: wheneverList
 };
 
-// Nomes exibidos no histórico
 const categoryLabels = {
     important: "Mais importante",
     required: "Precisa ser feito",
@@ -196,15 +186,23 @@ function showPendingView() {
     historyView.hidden = true;
 
     pendingTabButton.classList.add("active");
-    historyTabButton.classList.remove("active");
+
+    historyTabButton.classList.remove(
+        "active"
+    );
 }
 
 function showHistoryView() {
     pendingView.hidden = true;
     historyView.hidden = false;
 
-    pendingTabButton.classList.remove("active");
-    historyTabButton.classList.add("active");
+    pendingTabButton.classList.remove(
+        "active"
+    );
+
+    historyTabButton.classList.add(
+        "active"
+    );
 
     renderHistory();
 }
@@ -228,11 +226,46 @@ function createEmptyColumnMessage() {
 }
 
 // ========================================
-// CRIAR CARTÃO DE TAREFA PENDENTE
+// CRIAR BOTÃO DE AÇÃO
+// ========================================
+
+function createActionButton({
+    text,
+    title,
+    className,
+    onClick
+}) {
+    const button =
+        document.createElement("button");
+
+    button.type = "button";
+    button.textContent = text;
+    button.title = title;
+
+    button.classList.add(
+        "task-action-button",
+        className
+    );
+
+    button.addEventListener(
+        "click",
+        function (event) {
+            event.stopPropagation();
+
+            onClick();
+        }
+    );
+
+    return button;
+}
+
+// ========================================
+// CRIAR CARTÃO DA TAREFA
 // ========================================
 
 function createTaskCard(task) {
-    const taskId = String(task.id);
+    const taskId =
+        String(task.id);
 
     const hasNotes =
         typeof task.notes === "string" &&
@@ -242,38 +275,54 @@ function createTaskCard(task) {
         document.createElement("article");
 
     taskCard.classList.add("task-card");
-    taskCard.draggable = true;
-    taskCard.dataset.taskId = taskId;
 
-    if (openNotesTaskIds.has(taskId)) {
-        taskCard.classList.add("notes-open");
+    taskCard.draggable = true;
+
+    taskCard.dataset.taskId =
+        taskId;
+
+    if (
+        openNotesTaskIds.has(taskId)
+    ) {
+        taskCard.classList.add(
+            "notes-open"
+        );
     }
 
     const taskMain =
         document.createElement("div");
 
-    taskMain.classList.add("task-card-main");
+    taskMain.classList.add(
+        "task-card-main"
+    );
 
     const taskHeader =
         document.createElement("div");
 
-    taskHeader.classList.add("task-card-header");
+    taskHeader.classList.add(
+        "task-card-header"
+    );
 
     const taskBody =
         document.createElement("div");
 
-    taskBody.classList.add("task-card-body");
+    taskBody.classList.add(
+        "task-card-body"
+    );
 
     const taskText =
         document.createElement("span");
 
     taskText.classList.add("task-text");
-    taskText.textContent = task.text;
+
+    taskText.textContent =
+        task.text;
 
     const taskMeta =
         document.createElement("span");
 
     taskMeta.classList.add("task-meta");
+
     taskMeta.textContent =
         "Arraste para mudar a prioridade";
 
@@ -283,156 +332,153 @@ function createTaskCard(task) {
     const taskActions =
         document.createElement("div");
 
-    taskActions.classList.add("task-actions");
+    taskActions.classList.add(
+        "task-actions"
+    );
 
     // Botão editar
     const editButton =
-        document.createElement("button");
+        createActionButton({
+            text: "✏️",
+            title: "Editar tarefa",
+            className:
+                "edit-task-button",
 
-    editButton.type = "button";
-    editButton.textContent = "✏️";
-    editButton.title = "Editar tarefa";
-
-    editButton.classList.add(
-        "task-action-button",
-        "edit-task-button"
-    );
-
-    editButton.addEventListener(
-        "click",
-        function (event) {
-            event.stopPropagation();
-
-            openEditTaskModal(task.id);
-        }
-    );
+            onClick: function () {
+                openEditTaskModal(
+                    task.id
+                );
+            }
+        });
 
     // Botão observação
     const notesButton =
-        document.createElement("button");
+        createActionButton({
+            text: "💬",
 
-    notesButton.type = "button";
-    notesButton.textContent = "💬";
+            title: hasNotes
+                ? "Mostrar ou esconder observação"
+                : "Adicionar observação",
 
-    notesButton.classList.add(
-        "task-action-button",
-        "toggle-notes-button"
-    );
+            className:
+                "toggle-notes-button",
+
+            onClick: function () {
+                if (!hasNotes) {
+                    openEditTaskModal(
+                        task.id,
+                        true
+                    );
+
+                    return;
+                }
+
+                if (
+                    openNotesTaskIds.has(
+                        taskId
+                    )
+                ) {
+                    openNotesTaskIds.delete(
+                        taskId
+                    );
+                } else {
+                    openNotesTaskIds.add(
+                        taskId
+                    );
+                }
+
+                renderPendingTasks();
+            }
+        });
 
     if (hasNotes) {
-        notesButton.classList.add("has-notes");
-
-        notesButton.title =
-            "Mostrar ou esconder observação";
+        notesButton.classList.add(
+            "has-notes"
+        );
 
         notesButton.setAttribute(
             "aria-expanded",
             String(
-                openNotesTaskIds.has(taskId)
-            )
-        );
-    } else {
-        notesButton.title =
-            "Adicionar observação";
-    }
-
-    notesButton.addEventListener(
-        "click",
-        function (event) {
-            event.stopPropagation();
-
-            if (!hasNotes) {
-                openEditTaskModal(
-                    task.id,
-                    true
-                );
-
-                return;
-            }
-
-            if (
                 openNotesTaskIds.has(
                     taskId
                 )
-            ) {
-                openNotesTaskIds.delete(
-                    taskId
-                );
-            } else {
-                openNotesTaskIds.add(
-                    taskId
-                );
-            }
-
-            renderPendingTasks();
-        }
-    );
+            )
+        );
+    }
 
     // Botão concluir
     const completeButton =
-        document.createElement("button");
+        createActionButton({
+            text: "✓",
 
-    completeButton.type = "button";
-    completeButton.textContent = "✓";
-    completeButton.title =
-        "Marcar como concluída";
+            title:
+                "Marcar como concluída",
 
-    completeButton.classList.add(
-        "task-action-button",
-        "complete-task-button"
-    );
+            className:
+                "complete-task-button",
 
-    completeButton.addEventListener(
-        "click",
-        function (event) {
-            event.stopPropagation();
-
-            completeTask(task.id);
-        }
-    );
+            onClick: function () {
+                completeTask(task.id);
+            }
+        });
 
     // Botão excluir
     const deleteButton =
-        document.createElement("button");
+        createActionButton({
+            text: "🗑",
 
-    deleteButton.type = "button";
-    deleteButton.textContent = "🗑";
-    deleteButton.title =
-        "Excluir tarefa";
+            title:
+                "Excluir tarefa",
 
-    deleteButton.classList.add(
-        "task-action-button",
-        "delete-task-button"
+            className:
+                "delete-task-button",
+
+            onClick: function () {
+                deleteTask(task.id);
+            }
+        });
+
+    taskActions.appendChild(
+        editButton
     );
 
-    deleteButton.addEventListener(
-        "click",
-        function (event) {
-            event.stopPropagation();
-
-            deleteTask(task.id);
-        }
+    taskActions.appendChild(
+        notesButton
     );
 
-    taskActions.appendChild(editButton);
-    taskActions.appendChild(notesButton);
-    taskActions.appendChild(completeButton);
-    taskActions.appendChild(deleteButton);
+    taskActions.appendChild(
+        completeButton
+    );
 
-    taskHeader.appendChild(taskBody);
-    taskHeader.appendChild(taskActions);
+    taskActions.appendChild(
+        deleteButton
+    );
 
-    taskMain.appendChild(taskHeader);
+    taskHeader.appendChild(
+        taskBody
+    );
+
+    taskHeader.appendChild(
+        taskActions
+    );
+
+    taskMain.appendChild(
+        taskHeader
+    );
 
     // Área da observação
     if (hasNotes) {
         const notesArea =
             document.createElement("div");
 
-        notesArea.classList.add("task-notes");
+        notesArea.classList.add(
+            "task-notes"
+        );
 
         notesArea.hidden =
-            !openNotesTaskIds.has(taskId);
+            !openNotesTaskIds.has(
+                taskId
+            );
 
         const notesLabel =
             document.createElement("span");
@@ -454,19 +500,29 @@ function createTaskCard(task) {
         notesText.textContent =
             task.notes;
 
-        notesArea.appendChild(notesLabel);
-        notesArea.appendChild(notesText);
+        notesArea.appendChild(
+            notesLabel
+        );
 
-        taskMain.appendChild(notesArea);
+        notesArea.appendChild(
+            notesText
+        );
+
+        taskMain.appendChild(
+            notesArea
+        );
     }
 
-    taskCard.appendChild(taskMain);
+    taskCard.appendChild(
+        taskMain
+    );
 
-    // Arrastar tarefa
+    // Início do arrastar
     taskCard.addEventListener(
         "dragstart",
         function (event) {
-            draggedTaskId = taskId;
+            draggedTaskId =
+                taskId;
 
             taskCard.classList.add(
                 "dragging"
@@ -482,6 +538,7 @@ function createTaskCard(task) {
         }
     );
 
+    // Final do arrastar
     taskCard.addEventListener(
         "dragend",
         function () {
@@ -519,32 +576,35 @@ function renderPendingTasks() {
         whenever: 0
     };
 
-    const pendingTasks = tasks.filter(
-        function (task) {
-            return !task.completed;
-        }
-    );
+    const pendingTasks =
+        tasks.filter(
+            function (task) {
+                return !task.completed;
+            }
+        );
 
     pendingTasks.forEach(
         function (task) {
             const category =
-                task.category || "required";
+                task.category ||
+                "required";
 
             const categoryList =
-                categoryLists[category];
+                categoryLists[
+                    category
+                ];
 
             if (!categoryList) {
                 return;
             }
 
-            const taskCard =
-                createTaskCard(task);
-
             categoryList.appendChild(
-                taskCard
+                createTaskCard(task)
             );
 
-            categoryCounts[category]++;
+            categoryCounts[
+                category
+            ] += 1;
         }
     );
 
@@ -557,13 +617,13 @@ function renderPendingTasks() {
     wheneverCount.textContent =
         categoryCounts.whenever;
 
-    Object.keys(categoryLists).forEach(
-        function (category) {
-            const list =
-                categoryLists[category];
-
+    Object.values(
+        categoryLists
+    ).forEach(
+        function (list) {
             if (
-                list.children.length === 0
+                list.children.length ===
+                0
             ) {
                 list.appendChild(
                     createEmptyColumnMessage()
@@ -574,10 +634,12 @@ function renderPendingTasks() {
 }
 
 // ========================================
-// FORMATAR DATA DO HISTÓRICO
+// FORMATAR DATA
 // ========================================
 
-function formatCompletedDate(dateValue) {
+function formatCompletedDate(
+    dateValue
+) {
     if (!dateValue) {
         return "Data não registrada";
     }
@@ -586,7 +648,9 @@ function formatCompletedDate(dateValue) {
         new Date(dateValue);
 
     if (
-        Number.isNaN(date.getTime())
+        Number.isNaN(
+            date.getTime()
+        )
     ) {
         return "Data inválida";
     }
@@ -604,13 +668,19 @@ function formatCompletedDate(dateValue) {
 }
 
 // ========================================
-// DATAS UTILIZADAS NOS FILTROS
+// DATAS DOS FILTROS
 // ========================================
 
 function getStartOfToday() {
-    const date = new Date();
+    const date =
+        new Date();
 
-    date.setHours(0, 0, 0, 0);
+    date.setHours(
+        0,
+        0,
+        0,
+        0
+    );
 
     return date;
 }
@@ -639,14 +709,16 @@ function getStartOfWeek() {
             : 1 - currentDay;
 
     date.setDate(
-        date.getDate() + difference
+        date.getDate() +
+            difference
     );
 
     return date;
 }
 
 function getStartOfMonth() {
-    const today = new Date();
+    const today =
+        new Date();
 
     return new Date(
         today.getFullYear(),
@@ -656,7 +728,7 @@ function getStartOfMonth() {
 }
 
 // ========================================
-// FILTRAR TAREFAS DO HISTÓRICO
+// FILTRAR HISTÓRICO
 // ========================================
 
 function getFilteredHistoryTasks() {
@@ -670,72 +742,87 @@ function getFilteredHistoryTasks() {
 
     let startDate = null;
 
-    if (selectedPeriod === "today") {
+    if (
+        selectedPeriod ===
+        "today"
+    ) {
         startDate =
             getStartOfToday();
-    }
-
-    if (selectedPeriod === "week") {
+    } else if (
+        selectedPeriod ===
+        "week"
+    ) {
         startDate =
             getStartOfWeek();
-    }
-
-    if (selectedPeriod === "month") {
+    } else if (
+        selectedPeriod ===
+        "month"
+    ) {
         startDate =
             getStartOfMonth();
     }
 
     return tasks
-        .filter(function (task) {
-            return task.completed;
-        })
-        .filter(function (task) {
-            return task.text
-                .toLowerCase()
-                .includes(searchText);
-        })
-        .filter(function (task) {
-            if (!startDate) {
-                return true;
+        .filter(
+            function (task) {
+                return task.completed;
             }
+        )
+        .filter(
+            function (task) {
+                const searchableText =
+                    `${task.text} ${task.notes || ""}`
+                        .toLowerCase();
 
-            if (!task.completedAt) {
-                return false;
-            }
-
-            const completedDate =
-                new Date(
-                    task.completedAt
+                return searchableText.includes(
+                    searchText
                 );
+            }
+        )
+        .filter(
+            function (task) {
+                if (!startDate) {
+                    return true;
+                }
 
-            return (
-                completedDate >=
-                startDate
-            );
-        })
-        .sort(function (
-            firstTask,
-            secondTask
-        ) {
-            const firstDate =
-                firstTask.completedAt
-                    ? new Date(
-                        firstTask.completedAt
-                    ).getTime()
-                    : 0;
+                if (
+                    !task.completedAt
+                ) {
+                    return false;
+                }
 
-            const secondDate =
-                secondTask.completedAt
-                    ? new Date(
-                        secondTask.completedAt
-                    ).getTime()
-                    : 0;
+                return (
+                    new Date(
+                        task.completedAt
+                    ) >= startDate
+                );
+            }
+        )
+        .sort(
+            function (
+                firstTask,
+                secondTask
+            ) {
+                const firstDate =
+                    firstTask.completedAt
+                        ? new Date(
+                            firstTask.completedAt
+                        ).getTime()
+                        : 0;
 
-            return (
-                secondDate -
-                firstDate
-            );
-        });
+                const secondDate =
+                    secondTask.completedAt
+                        ? new Date(
+                            secondTask.completedAt
+                        ).getTime()
+                        : 0;
+
+                return (
+                    secondDate -
+                    firstDate
+                );
+            }
+        );
 }
 
 // ========================================
@@ -784,11 +871,12 @@ function createHistoryRow(task) {
         taskText
     );
 
+    const category =
+        task.category ||
+        "required";
+
     const priorityBadge =
         document.createElement("span");
-
-    const category =
-        task.category || "required";
 
     priorityBadge.classList.add(
         "priority-badge",
@@ -796,8 +884,9 @@ function createHistoryRow(task) {
     );
 
     priorityBadge.textContent =
-        categoryLabels[category] ||
-        "Sem prioridade";
+        categoryLabels[
+            category
+        ] || "Sem prioridade";
 
     const completedDate =
         document.createElement("span");
@@ -827,6 +916,77 @@ function createHistoryRow(task) {
 }
 
 // ========================================
+// CONTADORES DO HISTÓRICO
+// ========================================
+
+function updateHistorySummary() {
+    const completedTasks =
+        tasks.filter(
+            function (task) {
+                return task.completed;
+            }
+        );
+
+    const todayStart =
+        getStartOfToday();
+
+    const tomorrowStart =
+        getStartOfTomorrow();
+
+    const weekStart =
+        getStartOfWeek();
+
+    const todayTasks =
+        completedTasks.filter(
+            function (task) {
+                if (
+                    !task.completedAt
+                ) {
+                    return false;
+                }
+
+                const completedDate =
+                    new Date(
+                        task.completedAt
+                    );
+
+                return (
+                    completedDate >=
+                        todayStart &&
+                    completedDate <
+                        tomorrowStart
+                );
+            }
+        );
+
+    const weekTasks =
+        completedTasks.filter(
+            function (task) {
+                if (
+                    !task.completedAt
+                ) {
+                    return false;
+                }
+
+                return (
+                    new Date(
+                        task.completedAt
+                    ) >= weekStart
+                );
+            }
+        );
+
+    completedTodayCount.textContent =
+        todayTasks.length;
+
+    completedWeekCount.textContent =
+        weekTasks.length;
+
+    completedTotalCount.textContent =
+        completedTasks.length;
+}
+
+// ========================================
 // MOSTRAR HISTÓRICO
 // ========================================
 
@@ -852,100 +1012,20 @@ function renderHistory() {
         historyList.appendChild(
             emptyMessage
         );
-
-        updateHistorySummary();
-
-        return;
+    } else {
+        filteredTasks.forEach(
+            function (task) {
+                historyList.appendChild(
+                    createHistoryRow(
+                        task
+                    )
+                );
+            }
+        );
     }
-
-    filteredTasks.forEach(
-        function (task) {
-            const historyRow =
-                createHistoryRow(task);
-
-            historyList.appendChild(
-                historyRow
-            );
-        }
-    );
 
     updateHistorySummary();
 }
-
-// ========================================
-// CONTADORES DO HISTÓRICO
-// ========================================
-
-function updateHistorySummary() {
-    const completedTasks =
-        tasks.filter(
-            function (task) {
-                return task.completed;
-            }
-        );
-
-    const todayStart =
-        getStartOfToday();
-
-    const tomorrowStart =
-        getStartOfTomorrow();
-
-    const weekStart =
-        getStartOfWeek();
-
-    const todayTasks =
-        completedTasks.filter(
-            function (task) {
-                if (!task.completedAt) {
-                    return false;
-                }
-
-                const completedDate =
-                    new Date(
-                        task.completedAt
-                    );
-
-                return (
-                    completedDate >=
-                        todayStart &&
-                    completedDate <
-                        tomorrowStart
-                );
-            }
-        );
-
-    const weekTasks =
-        completedTasks.filter(
-            function (task) {
-                if (!task.completedAt) {
-                    return false;
-                }
-
-                const completedDate =
-                    new Date(
-                        task.completedAt
-                    );
-
-                return (
-                    completedDate >=
-                    weekStart
-                );
-            }
-        );
-
-    completedTodayCount.textContent =
-        todayTasks.length;
-
-    completedWeekCount.textContent =
-        weekTasks.length;
-
-    completedTotalCount.textContent =
-        completedTasks.length;
-}
-
-// ========================================
-// ATUALIZAR TODAS AS TELAS
-// ========================================
 
 function renderAll() {
     renderPendingTasks();
@@ -953,7 +1033,7 @@ function renderAll() {
 }
 
 // ========================================
-// BUSCAR TAREFAS NO SUPABASE
+// CARREGAR TAREFAS DO SUPABASE
 // ========================================
 
 async function loadTasks() {
@@ -964,15 +1044,19 @@ async function loadTasks() {
                 `
                 id,
                 text,
+                notes,
                 category,
                 completed,
                 created_at,
                 completed_at
                 `
             )
-            .order("created_at", {
-                ascending: true
-            });
+            .order(
+                "created_at",
+                {
+                    ascending: true
+                }
+            );
 
     if (error) {
         console.error(
@@ -987,20 +1071,29 @@ async function loadTasks() {
         return;
     }
 
-    tasks = data.map(
+    tasks = (data || []).map(
         function (task) {
             return {
                 id: task.id,
-                text: task.text,
+
+                text:
+                    task.text,
+
+                notes:
+                    task.notes || "",
+
                 category:
                     task.category ||
                     "required",
+
                 completed:
                     Boolean(
                         task.completed
                     ),
+
                 createdAt:
                     task.created_at,
+
                 completedAt:
                     task.completed_at
             };
@@ -1011,7 +1104,7 @@ async function loadTasks() {
 }
 
 // ========================================
-// ADICIONAR NOVA TAREFA
+// ADICIONAR TAREFA
 // ========================================
 
 async function addTask() {
@@ -1031,65 +1124,293 @@ async function addTask() {
         return;
     }
 
-    addTaskButton.disabled = true;
+    addTaskButton.disabled =
+        true;
 
     addTaskButton.textContent =
         "Adicionando...";
 
-    const { error } =
-        await supabaseClient
-            .from("tasks")
-            .insert({
-                text: taskText,
-                category:
-                    selectedCategory,
-                completed: false,
-                completed_at: null
-            });
+    try {
+        const { error } =
+            await supabaseClient
+                .from("tasks")
+                .insert({
+                    text:
+                        taskText,
 
-    addTaskButton.disabled = false;
+                    notes:
+                        null,
 
-    addTaskButton.textContent =
-        "Adicionar tarefa";
+                    category:
+                        selectedCategory,
 
-    if (error) {
+                    completed:
+                        false,
+
+                    completed_at:
+                        null
+                });
+
+        if (error) {
+            console.error(
+                "Erro ao adicionar tarefa:",
+                error
+            );
+
+            alert(
+                `Não foi possível adicionar a tarefa: ${error.message}`
+            );
+
+            return;
+        }
+
+        taskInput.value = "";
+
+        taskCategory.value =
+            "required";
+
+        taskInput.focus();
+
+        await loadTasks();
+    } catch (error) {
         console.error(
-            "Erro ao adicionar tarefa:",
+            "Erro inesperado ao adicionar tarefa:",
             error
         );
 
         alert(
-            `Não foi possível adicionar a tarefa: ${error.message}`
+            "Ocorreu um erro inesperado ao adicionar a tarefa."
         );
+    } finally {
+        addTaskButton.disabled =
+            false;
+
+        addTaskButton.textContent =
+            "Adicionar tarefa";
+    }
+}
+
+// ========================================
+// ABRIR MODAL DE EDIÇÃO
+// ========================================
+
+function openEditTaskModal(
+    taskId,
+    focusNotes = false
+) {
+    const task =
+        tasks.find(
+            function (currentTask) {
+                return (
+                    String(
+                        currentTask.id
+                    ) ===
+                    String(taskId)
+                );
+            }
+        );
+
+    if (
+        !task ||
+        !editTaskModal
+    ) {
+        return;
+    }
+
+    editTaskId.value =
+        String(task.id);
+
+    editTaskText.value =
+        task.text;
+
+    editTaskCategory.value =
+        task.category ||
+        "required";
+
+    editTaskNotes.value =
+        task.notes || "";
+
+    updateEditNotesCount();
+
+    editTaskModal.hidden =
+        false;
+
+    document.body.classList.add(
+        "modal-open"
+    );
+
+    requestAnimationFrame(
+        function () {
+            if (focusNotes) {
+                editTaskNotes.focus();
+            } else {
+                editTaskText.focus();
+
+                editTaskText.select();
+            }
+        }
+    );
+}
+
+// ========================================
+// FECHAR MODAL DE EDIÇÃO
+// ========================================
+
+function closeEditTaskModal() {
+    if (!editTaskModal) {
+        return;
+    }
+
+    editTaskModal.hidden =
+        true;
+
+    document.body.classList.remove(
+        "modal-open"
+    );
+
+    editTaskForm.reset();
+
+    editTaskId.value = "";
+
+    updateEditNotesCount();
+}
+
+// ========================================
+// CONTADOR DE CARACTERES
+// ========================================
+
+function updateEditNotesCount() {
+    if (
+        !editTaskNotes ||
+        !editNotesCount
+    ) {
+        return;
+    }
+
+    editNotesCount.textContent =
+        `${editTaskNotes.value.length}/1000`;
+}
+
+// ========================================
+// SALVAR EDIÇÃO
+// ========================================
+
+async function saveTaskEdits(
+    event
+) {
+    event.preventDefault();
+
+    const taskId =
+        editTaskId.value;
+
+    const newText =
+        editTaskText.value.trim();
+
+    const newCategory =
+        editTaskCategory.value;
+
+    const newNotes =
+        editTaskNotes.value.trim();
+
+    if (newText === "") {
+        alert(
+            "A descrição da tarefa não pode ficar vazia."
+        );
+
+        editTaskText.focus();
 
         return;
     }
 
-    taskInput.value = "";
+    saveEditButton.disabled =
+        true;
 
-    taskCategory.value =
-        "required";
+    saveEditButton.textContent =
+        "Salvando...";
 
-    taskInput.focus();
+    try {
+        const { error } =
+            await supabaseClient
+                .from("tasks")
+                .update({
+                    text:
+                        newText,
 
-    await loadTasks();
+                    category:
+                        newCategory,
+
+                    notes:
+                        newNotes === ""
+                            ? null
+                            : newNotes
+                })
+                .eq(
+                    "id",
+                    taskId
+                );
+
+        if (error) {
+            console.error(
+                "Erro ao editar tarefa:",
+                error
+            );
+
+            alert(
+                `Não foi possível salvar as alterações: ${error.message}`
+            );
+
+            return;
+        }
+
+        if (newNotes === "") {
+            openNotesTaskIds.delete(
+                String(taskId)
+            );
+        } else {
+            openNotesTaskIds.add(
+                String(taskId)
+            );
+        }
+
+        closeEditTaskModal();
+
+        await loadTasks();
+    } catch (error) {
+        console.error(
+            "Erro inesperado ao editar tarefa:",
+            error
+        );
+
+        alert(
+            "Ocorreu um erro inesperado ao salvar as alterações."
+        );
+    } finally {
+        saveEditButton.disabled =
+            false;
+
+        saveEditButton.textContent =
+            "Salvar alterações";
+    }
 }
 
 // ========================================
 // CONCLUIR TAREFA
 // ========================================
 
-async function completeTask(taskId) {
-    const task = tasks.find(
-        function (currentTask) {
-            return (
-                String(
-                    currentTask.id
-                ) ===
-                String(taskId)
-            );
-        }
-    );
+async function completeTask(
+    taskId
+) {
+    const task =
+        tasks.find(
+            function (currentTask) {
+                return (
+                    String(
+                        currentTask.id
+                    ) ===
+                    String(taskId)
+                );
+            }
+        );
 
     if (!task) {
         return;
@@ -1104,18 +1425,21 @@ async function completeTask(taskId) {
         return;
     }
 
-    const completedAt =
-        new Date().toISOString();
-
     const { error } =
         await supabaseClient
             .from("tasks")
             .update({
-                completed: true,
+                completed:
+                    true,
+
                 completed_at:
-                    completedAt
+                    new Date()
+                        .toISOString()
             })
-            .eq("id", task.id);
+            .eq(
+                "id",
+                task.id
+            );
 
     if (error) {
         console.error(
@@ -1129,6 +1453,10 @@ async function completeTask(taskId) {
 
         return;
     }
+
+    openNotesTaskIds.delete(
+        String(task.id)
+    );
 
     await loadTasks();
 }
@@ -1155,27 +1483,23 @@ async function moveTaskToCategory(
         return;
     }
 
-    const task = tasks.find(
-        function (currentTask) {
-            return (
-                String(
-                    currentTask.id
-                ) ===
-                String(taskId)
-            );
-        }
-    );
+    const task =
+        tasks.find(
+            function (currentTask) {
+                return (
+                    String(
+                        currentTask.id
+                    ) ===
+                    String(taskId)
+                );
+            }
+        );
 
     if (
         !task ||
-        task.completed
-    ) {
-        return;
-    }
-
-    if (
+        task.completed ||
         task.category ===
-        newCategory
+            newCategory
     ) {
         return;
     }
@@ -1183,7 +1507,6 @@ async function moveTaskToCategory(
     const previousCategory =
         task.category;
 
-    // Atualiza primeiro na tela
     task.category =
         newCategory;
 
@@ -1196,7 +1519,10 @@ async function moveTaskToCategory(
                 category:
                     newCategory
             })
-            .eq("id", task.id);
+            .eq(
+                "id",
+                task.id
+            );
 
     if (error) {
         console.error(
@@ -1219,17 +1545,20 @@ async function moveTaskToCategory(
 // EXCLUIR TAREFA
 // ========================================
 
-async function deleteTask(taskId) {
-    const task = tasks.find(
-        function (currentTask) {
-            return (
-                String(
-                    currentTask.id
-                ) ===
-                String(taskId)
-            );
-        }
-    );
+async function deleteTask(
+    taskId
+) {
+    const task =
+        tasks.find(
+            function (currentTask) {
+                return (
+                    String(
+                        currentTask.id
+                    ) ===
+                    String(taskId)
+                );
+            }
+        );
 
     if (!task) {
         return;
@@ -1248,7 +1577,10 @@ async function deleteTask(taskId) {
         await supabaseClient
             .from("tasks")
             .delete()
-            .eq("id", task.id);
+            .eq(
+                "id",
+                task.id
+            );
 
     if (error) {
         console.error(
@@ -1263,16 +1595,21 @@ async function deleteTask(taskId) {
         return;
     }
 
-    tasks = tasks.filter(
-        function (currentTask) {
-            return (
-                String(
-                    currentTask.id
-                ) !==
-                String(task.id)
-            );
-        }
+    openNotesTaskIds.delete(
+        String(task.id)
     );
+
+    tasks =
+        tasks.filter(
+            function (currentTask) {
+                return (
+                    String(
+                        currentTask.id
+                    ) !==
+                    String(task.id)
+                );
+            }
+        );
 
     renderAll();
 }
@@ -1342,11 +1679,13 @@ dropZones.forEach(
 );
 
 // ========================================
-// SINCRONIZAÇÃO EM TEMPO REAL
+// REALTIME
 // ========================================
 
 function startRealtime() {
-    if (tasksRealtimeChannel) {
+    if (
+        tasksRealtimeChannel
+    ) {
         return;
     }
 
@@ -1370,7 +1709,9 @@ function startRealtime() {
 }
 
 async function stopRealtime() {
-    if (!tasksRealtimeChannel) {
+    if (
+        !tasksRealtimeChannel
+    ) {
         return;
     }
 
@@ -1378,7 +1719,8 @@ async function stopRealtime() {
         tasksRealtimeChannel
     );
 
-    tasksRealtimeChannel = null;
+    tasksRealtimeChannel =
+        null;
 }
 
 // ========================================
@@ -1402,43 +1744,64 @@ async function login() {
         return;
     }
 
+    loginButton.disabled =
+        true;
+
     loginMessage.textContent =
         "Entrando...";
 
-    const { error } =
-        await supabaseClient.auth
-            .signInWithPassword({
-                email: email,
-                password: password
-            });
+    try {
+        const { error } =
+            await supabaseClient.auth
+                .signInWithPassword({
+                    email:
+                        email,
 
-    if (error) {
+                    password:
+                        password
+                });
+
+        if (error) {
+            console.error(
+                "Erro no login:",
+                error
+            );
+
+            loginMessage.textContent =
+                "E-mail ou senha incorretos.";
+
+            return;
+        }
+
+        loginMessage.textContent =
+            "";
+
+        loginPassword.value =
+            "";
+
+        showApp();
+
+        showPendingView();
+
+        await loadTasks();
+
+        startRealtime();
+    } catch (error) {
         console.error(
-            "Erro no login:",
+            "Erro inesperado no login:",
             error
         );
 
         loginMessage.textContent =
-            "E-mail ou senha incorretos.";
-
-        return;
+            "Não foi possível entrar agora.";
+    } finally {
+        loginButton.disabled =
+            false;
     }
-
-    loginMessage.textContent = "";
-
-    loginPassword.value = "";
-
-    showApp();
-
-    showPendingView();
-
-    await loadTasks();
-
-    startRealtime();
 }
 
 // ========================================
-// SAIR DO SISTEMA
+// LOGOUT
 // ========================================
 
 async function logout() {
@@ -1465,14 +1828,34 @@ async function logout() {
 
     tasks = [];
 
-    importantList.innerHTML = "";
-    requiredList.innerHTML = "";
-    wheneverList.innerHTML = "";
-    historyList.innerHTML = "";
+    openNotesTaskIds.clear();
+
+    importantList.innerHTML =
+        "";
+
+    requiredList.innerHTML =
+        "";
+
+    wheneverList.innerHTML =
+        "";
+
+    historyList.innerHTML =
+        "";
+
+    if (
+        editTaskModal &&
+        !editTaskModal.hidden
+    ) {
+        closeEditTaskModal();
+    }
 
     loginEmail.value = "";
-    loginPassword.value = "";
-    loginMessage.textContent = "";
+
+    loginPassword.value =
+        "";
+
+    loginMessage.textContent =
+        "";
 
     showLogin();
 
@@ -1480,7 +1863,7 @@ async function logout() {
 }
 
 // ========================================
-// VERIFICAR SESSÃO AO ABRIR
+// VERIFICAR SESSÃO
 // ========================================
 
 async function checkSession() {
@@ -1524,45 +1907,11 @@ addTaskButton.addEventListener(
 taskInput.addEventListener(
     "keydown",
     function (event) {
-        if (event.key === "Enter") {
-            addTask();
-        }
-    }
-);
-
-editTaskForm.addEventListener(
-    "submit",
-    saveTaskEdits
-);
-
-closeEditModalButton.addEventListener(
-    "click",
-    closeEditTaskModal
-);
-
-cancelEditButton.addEventListener(
-    "click",
-    closeEditTaskModal
-);
-
-editModalBackdrop.addEventListener(
-    "click",
-    closeEditTaskModal
-);
-
-editTaskNotes.addEventListener(
-    "input",
-    updateEditNotesCount
-);
-
-document.addEventListener(
-    "keydown",
-    function (event) {
         if (
-            event.key === "Escape" &&
-            !editTaskModal.hidden
+            event.key ===
+            "Enter"
         ) {
-            closeEditTaskModal();
+            addTask();
         }
     }
 );
@@ -1575,7 +1924,10 @@ loginButton.addEventListener(
 loginPassword.addEventListener(
     "keydown",
     function (event) {
-        if (event.key === "Enter") {
+        if (
+            event.key ===
+            "Enter"
+        ) {
             login();
         }
     }
@@ -1606,5 +1958,58 @@ historyPeriod.addEventListener(
     renderHistory
 );
 
-// Verifica a sessão ao abrir a página
+// Os eventos do modal são verificados
+// para não bloquear o login caso algum
+// elemento do HTML esteja faltando.
+
+if (editTaskForm) {
+    editTaskForm.addEventListener(
+        "submit",
+        saveTaskEdits
+    );
+}
+
+if (closeEditModalButton) {
+    closeEditModalButton.addEventListener(
+        "click",
+        closeEditTaskModal
+    );
+}
+
+if (cancelEditButton) {
+    cancelEditButton.addEventListener(
+        "click",
+        closeEditTaskModal
+    );
+}
+
+if (editModalBackdrop) {
+    editModalBackdrop.addEventListener(
+        "click",
+        closeEditTaskModal
+    );
+}
+
+if (editTaskNotes) {
+    editTaskNotes.addEventListener(
+        "input",
+        updateEditNotesCount
+    );
+}
+
+document.addEventListener(
+    "keydown",
+    function (event) {
+        if (
+            event.key ===
+                "Escape" &&
+            editTaskModal &&
+            !editTaskModal.hidden
+        ) {
+            closeEditTaskModal();
+        }
+    }
+);
+
+// Inicia o sistema
 checkSession();
